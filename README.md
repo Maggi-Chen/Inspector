@@ -1,4 +1,4 @@
-# DeBreak
+# Inspector
 
 A reference-free assembly evaluator.
 
@@ -34,7 +34,7 @@ cd Inspector/
 
 ## Description
 
-DeBreak is a tool for assembly evaluation with long read data. The input includes a contig file, long reads (PacBio CLR, PacBio HiFi, Oxford Nanopore, or mixed platform), and a reference genome (optional). The output includes A summary report, read-to-contig alignment file, a list of structrual errors and small-scale errors. This program was tested on a x86_64 Linux system with a 8GB physical memory.
+Inspector is a tool for assembly evaluation with long read data. The input includes a contig file, long reads (PacBio CLR, PacBio HiFi, Oxford Nanopore, or mixed platform), and a reference genome (optional). The output includes A summary report, read-to-contig alignment file, a list of structrual errors and small-scale errors. This program was tested on a x86_64 Linux system with a 8GB physical memory.
 
 ## Depencency
 
@@ -44,6 +44,7 @@ python package:  pysam, statsmodels
 
 * minimap2  (tested with version 2.10 and 2.15)
 * samtools  (tested with version 1.9)
+
 
 Dependencies for Inspector error correction module:
 * flye  (tested with version 2.8.2)
@@ -85,6 +86,7 @@ inspector.py [-h] -c contig.fa -r raw_reads.fa -o output_dict/
   --skip_base_error_detect      Skip the step of detecting small-scale errors from pileup
 
 
+
 inspector-correct.py [-h] -i inspector_out/ --data pacbio-raw 
   required arguments:
   --inspector,-i        Inspector evaluation directory with original file names
@@ -116,6 +118,7 @@ If only the continuity analysis is needed, simply provide an empty file for --re
 ./inspector.py -c contig.fa -r emptyfile -o inspector_out/ --skip_base_error --skip_structural_error
 ```
 For the '--skip' options, do not use unless you are repeating the evaluation with same contig and read files in the same output directory. These may help save time when testing different options for error detection.
+
 
 
 Inspector provides an error-correction module to improve assembly accuracy. High-accuracy reads are recommended, especially for small-scale error correction:
