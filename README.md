@@ -39,8 +39,10 @@ Inspector is a tool for assembly evaluation with long read data. The input inclu
 ## Depencency
 
 Dependencies for Inspector:
+
 python 2.7  
-python package:  pysam, statsmodels  
+* pysam
+* statsmodels
 
 * minimap2  (tested with version 2.10 and 2.15)
 * samtools  (tested with version 1.9)
@@ -57,8 +59,24 @@ git clone https://github.com/Maggi-Chen/Inspector.git
 ```
 Then, please also add this directory to your PATH:
 ```
-export PATH=$PWD/DeBreak/:$PATH
+export PATH=$PWD/Inspector/:$PATH
 ```
+
+
+To simplify the environment setup process, Anaconda (https://www.anaconda.com/) is recommended.
+To create an environment with conda:
+```
+conda create --name ins python=2.7
+conda activate ins
+conda install -c bioconda minimap2=2.15
+conda install -c bioconda samtools=1.9
+conda install -c bioconda pysam=0.16.0.1
+conda install -c anaconda statsmodels=0.10.1
+conda install -c bioconda flye=2.8.2
+
+inspector.py -h
+```
+
 
 ## General usage
 
