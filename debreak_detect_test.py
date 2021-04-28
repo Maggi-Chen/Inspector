@@ -371,8 +371,8 @@ def detect_sortbam(workpath,min_size,max_size,chrom):
 		readinfo=[readname,flag,chrom,position,refend,cigar_info,mappingquality]
 		if align.is_supplementary:
 			cigar=align.cigarstring
-			cigarinfo=cigardeletion(flag,chrom,position,cigar,min_size,max_size)
-			cigarsv=cigarinfo[0]
+			cigarinfo=cigardeletion(flag,chrom,position,cigar,5,max_size)
+			cigarsv=[mm for mm in cigarinfo[0] if int(mm[2])>=min_size]
 			for d in cigarsv:
 				tempfile.write(d[0]+'\t'+str(d[1])+'\t'+str(d[2])+'\t'+d[3]+'\t'+readname+'\t'+str(flag)+'\t'+str(mappingquality)+'\n')
 
@@ -389,8 +389,8 @@ def detect_sortbam(workpath,min_size,max_size,chrom):
 			totalmaplength+=align.query_length
 			number_read+=1
 			cigar=align.cigarstring
-			cigarinfo=cigardeletion(flag,chrom,position,cigar,min_size,max_size)
-			cigarsv=cigarinfo[0]
+			cigarinfo=cigardeletion(flag,chrom,position,cigar,5,max_size)
+			cigarsv=[mm for mm in cigarinfo[0] if int(mm[2])>=min_size]
 			for d in cigarsv:
 				tempfile.write(d[0]+'\t'+str(d[1])+'\t'+str(d[2])+'\t'+d[3]+'\t'+readname+'\t'+str(flag)+'\t'+str(mappingquality)+'\n')
 
@@ -494,8 +494,6 @@ def detect_sam_ref(filename,readpath,writepath,min_size,max_size):
 			c=f.readline()
 			continue
 
-
-
 		refend=position+cigarinfo[1]
 		cimplecigar=str(cigarinfo[2][0])+'\t'+str(cigarinfo[2][1])+'\t'+str(cigarinfo[2][2])
 		# if primary: write deletions from cigar string
@@ -540,7 +538,6 @@ if __name__ =="__main__":
 	workpath=readpath
 	#filename='contig_to_ref.sam'
 	#detect_sam_ref(filename,readpath,writepath,50,400000000)
-	#detect_sortbam('/data/scratch/maggic/HGSVC_results/HG00514/inspector_ccs_un_racon_new/',50,20000,'HAP_1_cluster24_000043F',False)
 	detect_sam_ref("contig_to_ref.sam",readpath,readpath,10,40000000)
 	#detect_sortbam(workpath,20,4000000000,'tig00021351')
 

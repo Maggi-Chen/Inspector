@@ -2,6 +2,9 @@ import time
 import os
 import pysam 
 import denovo_static
+import sys
+
+
 def mergerpossort(a):
 	return int(a.split('\t')[1])
 
@@ -172,7 +175,7 @@ def mergeinfo_insertion(candi,min_support):
 	if len(candi)>=1.5*min_support:
 		upper=int(candi[len(candi)*3/4].split('\t')[2])
 		lower=int(candi[len(candi)/4].split('\t')[2])
-		if upper>1.75*lower:
+		if upper>3*lower:
 			svgroups=assign_candi_insertion(candi,upper,lower)
 			svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
 			svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
@@ -425,18 +428,15 @@ def merge_translocation(min_support,min_qual,readpath,samechrom_translocation,ch
 
 
 
-def genotype(depth,outpath,chromosomes_large):
+def genotype(depth,outpath):
 	highcov=depth*2
 	allae=open(outpath+'assembly_errors.bed','r').read().split('\n')[:-1]
 	
-	samfile=pysam.AlignmentFile(outpath+'read_to_contig.sort.bam',"rb")
-	f=open(outpath+'assembly_errors.bed-gt','w')
+	samfile=pysam.AlignmentFile(outpath+'read_to_contig.bam',"rb")
+	f=open(outpath+'assembly_errors.bed-gt_test','w')
 	coll=0
 	expan=0
 	inv=0
-	coll_large=0
-	expan_large=0
-	inv_large=0
 
 	for c in allae:
 		chrom=c.split('\t')[0]
@@ -448,47 +448,49 @@ def genotype(depth,outpath,chromosomes_large):
 		if 'Expansion' in c or 'Inversion' in c:
 			leftcov=samfile.count(chrom,max(start-100,0),start,read_callback='all')
 			rightcov=samfile.count(chrom,stop,stop+100,read_callback='all')
-			if leftcov>highcov and rightcov>highcov:
-				continue
+			#if leftcov>highcov and rightcov>highcov:
+		#		continue
 		if 'Collapse' in c:
-			leftcov=samfile.count(chrom,max(0,start-100),start-50,read_callback='all')
-			rightcov=samfile.count(chrom,stop+50,stop+100,read_callback='all')
-			if leftcov>highcov and rightcov>highcov:
-				continue
+			leftcov=samfile.count(chrom,max(0,start-100),start,read_callback='all')
+			rightcov=samfile.count(chrom,stop,stop+100,read_callback='all')
+		#	if leftcov>highcov and rightcov>highcov:
+		#		continue
 		if 'Expan' in c:
 			expan+=1
-			if chrom in chromosomes_large:
-				expan_large+=1
 		if 'Coll' in c:
 			coll+=1
-			if chrom in chromosomes_large:
-				coll_large+=1
 		if 'Inv' in c:
 			inv+=1
-			if chrom in chromosomes_large:
-				inv_large+=1
 		gtinfo='./.'
 		if int(c.split('\t')[3])>=0.6*min(leftcov,rightcov):
 			gtinfo='1/1'
 		else:
 			gtinfo='1/0'
 
-		f.write(c+'\t'+gtinfo+'\n')
+		#f.write(c+'\t'+gtinfo+'\n')
+		f.write(c+'\t'+gtinfo+'\t'+str(leftcov)+'\t'+str(rightcov)+'\t'+str(min(rightcov,leftcov))+'\n')
 	f.close()
+	'''
 	f=open(outpath+'summary_statistics','a')
 	f.write('After Genotyping:\n')
 	f.write('Number of assembly collapse\t'+str(coll)+'\n')
 	f.write('Number of assembly expansion\t'+str(expan)+'\n')
-	f.write('Number of assembly inversion\t'+str(inv)+'\n')
+	f.write('Number of assembly inversion\t'+str(inv)+'\n\n\n')
+	'''
+
+
+
+	'''
 	f.write('Number of assembly collapse in large contigs\t'+str(coll_large)+'\n')
 	f.write('Number of assembly expansion in large contigs\t'+str(expan_large)+'\n')
 	f.write('Number of assembly inversion in large contigs\t'+str(inv_large)+'\n\n\n')
+	'''
 	f.close()
 	return True
 
 if __name__ =="__main__":
-	outpath='/data/scratch/maggic/simulation/denovosimulation/diploid_chr1_noNread/inspector_flye/'
-
+	#outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/flye_ccs/'
+	'''
 	allsvsignal=open(outpath+'read_to_contig.debreak.temp','r').read().split('\n')[:-1]
 	#allsvsignal=open(outpath+'read_to_large_contig.debreak.temp','r').read().split('\n')[:-1]
 
@@ -504,15 +506,27 @@ if __name__ =="__main__":
 		rawdupcalls[chrom]=[c.split('\t')[0]+'\t'+c.split('\t')[1]+'\t'+c.split('\t')[2]+'\t'+c.split('\t')[6]+'\t'+c.split('\t')[4] for c in allsvsignal if 'DUP-' in c and c.split('\t')[0]==chrom]
 		rawinvcalls[chrom]=[c.split('\t')[0]+'\t'+c.split('\t')[1]+'\t'+c.split('\t')[2]+'\t'+c.split('\t')[6]+'\t'+c.split('\t')[4] for c in allsvsignal if 'INV-' in c and c.split('\t')[0]==chrom]
 
-	minsupp=20
+	minsupp=5
 	for chrom in chromosomes:
 		merge_insertion(minsupp,0,outpath,rawinscalls[chrom],chrom,'ins',True,)
 		merge_deletion(minsupp,0,outpath,rawdelcalls[chrom],chrom,'del',True,)
 		merge_deletion(minsupp,0,outpath,rawdupcalls[chrom],chrom,'dup',True,)
 		merge_insertion(minsupp,0,outpath,rawinvcalls[chrom],chrom,'inv',True,)
+		#quit()
+	'''
+	#ty=sys.argv[1]
+	#outpath='/data/scratch/maggic/Inspector_results/simulation_clr/'+ty+'/'
+	outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/canu_nano/'
+	#outpath='/data/scratch/maggic/Inspector_results/simulation_ccs/wtdbg_ccs/'
+	genotype(50,outpath)
+	quit()
 
-	depth=200
-	denovo_static.assembly_info(outpath,[])
-	#genotype(depth,denovo_args.outpath,chromosomes_large)
+	#for tool in ['canu','flye','wtdbg','hifiasm']:
+	tool='hifiasm'
+	for ty in range(1,6):
+                        #outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/'+tool+'_'+ty+'/'
+#                outpath='/data/scratch/maggic/Inspector_results/simulation_'+ty+'/'+tool+'_'+ty+'/'
+		outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/racon_polish'+str(ty)+'/'
+                genotype(50,outpath)
+        quit()
 
-	genotype(200,outpath,[])
