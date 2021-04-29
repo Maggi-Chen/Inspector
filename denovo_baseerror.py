@@ -189,7 +189,6 @@ def count_baseerrror(path,ctgtotallen,datatype):
 	for c in baseerror:
 		f.write(c+'\n')
 	f.close()
-	quit()
 	f=open(path+'summary_statistics','a')
 	f.write('\n\nSmall-scale assembly error /per Mbp: '+str(per)+'\nTotal small-scale assembly error: '+str(iii)+'\nBase substitution: '+str(snv)+'\nSmall-scale expansion: '+str(indeldel)+'\n')
 	f.write('Small-scale collapse: '+str(indelins)+'\n')
