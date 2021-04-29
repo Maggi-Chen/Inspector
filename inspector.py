@@ -69,6 +69,10 @@ else:
 	print 'Error: Input contig file should be either 1 fasta file or two halploid.fa files. Check input -c/--contig.'
 	quit()
 
+if not denovo_args.skip_base_error:
+	import denovo_baseerror
+
+
 # Simple statistics of contigs	
 contiginfo=denovo_static.simple(denovo_args.contigfile,denovo_args.outpath,denovo_args.min_contig_length,denovo_args.min_contig_length_assemblyerror)
 chromosomes=contiginfo[0]
@@ -127,7 +131,7 @@ cov=denovo_static.mapping_info_ctg(denovo_args.outpath,chromosomes_large,chromos
 minsupp=round(cov/10.0)
 
 t3=time.time()
-print 'TIME: Raw sv detection: ',t3-t2
+print 'TIME: Structural error signal detection: ',t3-t2
 
 aelen_structuralerror=0
 if not denovo_args.skip_structural_error:
@@ -143,12 +147,11 @@ if not denovo_args.skip_structural_error:
 	aelen_structuralerror=debreak_cluster.filterae(cov,denovo_args.outpath,denovo_args.min_assembly_error_size,denovo_args.datatype)
 
 t4=time.time()
-print 'TIME: SV clustering : ',t4-t3
+print 'TIME: Structural error clustering : ',t4-t3
 
 # SNP & indel detection
 aelen_baseerror=0
 if not denovo_args.skip_base_error:
-	import denovo_baseerror
 	if not denovo_args.skip_base_error_detect:
 		os.system('samtools faidx '+denovo_args.outpath+'valid_contig.fa')
 		debreak_det=multiprocessing.Pool(denovo_args.thread)
@@ -162,7 +165,7 @@ if not denovo_args.skip_base_error:
 	aelen_baseerror=denovo_baseerror.count_baseerrror(denovo_args.outpath,totalcontiglen,denovo_args.datatype)
 
 t5=time.time()
-print 'TIME: SNV calling: ',t5-t4
+print 'TIME: Small-scale error detection: ',t5-t4
 
 #QV
 if aelen_structuralerror+aelen_baseerror>0:
@@ -205,5 +208,5 @@ if denovo_args.ref:
 	denovo_static.basepair_error_ref(denovo_args.outpath,contiginfo[5])
 
 t7=time.time()
-print 'TIME: ref based mode: ',t7-t6
+print 'TIME: Reference-based mode: ',t7-t6
 
