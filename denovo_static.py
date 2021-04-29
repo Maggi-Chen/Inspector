@@ -121,7 +121,7 @@ def mapping_info_ctg(outpath,largechrom,smallchrom,contiglength,contiglength_lar
 	info=open(outpath+'map_depth/all_splitread_total','r').read().split('\n')[:-1]
 	splitread=sum([int(ccc) for ccc in info])
 	splrate=round(10000*float(splitread)/mapped)/100.0
-	f.write('Split-read rate /%'+str(splrate)+'\n')
+	f.write('Split-read rate /%\t'+str(splrate)+'\n')
 
 	info=open(outpath+'map_depth/all_maplength_total','r').read().split('\n')[:-1]
 	mappedlen=sum([int(ccc) for ccc in info])
