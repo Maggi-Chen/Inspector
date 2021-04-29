@@ -436,10 +436,6 @@ def filterae(depth,outpath,min_size,datatype):
                 if int(c.split('\t')[3]) >=10 and int(c.split('\t')[3])>=rat*int(c.split('\t')[9]) and lowcov<=int(c.split('\t')[9])<highcov:
                         new+=[c]; continue
 		
-	'''
-                if int(c.split('\t')[3]) >=10 and int(c.split('\t')[3])>=(rat-0.2)*int(c.split('\t')[9]) and lowcov<=int(c.split('\t')[9])<highcov and max([int(m) for m in c.split('\t')[5].split('=')[1].split(';')])>=1000:
-                        new+=[c]
-	'''
         f=open(outpath+'structural_error.bed','w')
         for c in new:
                 f.write(c+'\n')
@@ -451,12 +447,12 @@ def filterae(depth,outpath,min_size,datatype):
 	het=len([mm for mm in new if 'Hete' in mm])
 	inv=len([mm for mm in new if 'Inv' in mm])
 	f=open(outpath+'summary_statistics','a')
-	f.write('\n\nStructural error: '+str(len(new))+'\nExpansion: '+str(exp)+'\nCollapse: '+str(col))
-	f.write('\nHeterozygosis error: '+str(het)+'\nInversion: '+str(inv)+'\n')
+	f.write('\n\nStructural error\t'+str(len(new))+'\nExpansion\t'+str(exp)+'\nCollapse\t'+str(col))
+	f.write('\nHeterozygosis error\t'+str(het)+'\nInversion\t'+str(inv)+'\n')
 	f.close()
 
 	os.system('rm '+outpath+'assembly_errors.bed*')
-
+	os.system('rm '+outpath+'read_to_contig.debreak.temp')
 	totalbase=0
 	for c in new:
 		if 'Inv' in c:
