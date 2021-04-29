@@ -2,7 +2,7 @@
 import os
 import argparse
 import denovo_static
-import debreak_detect_test as debreak_detect
+import debreak_detect
 import debreak_merge_clustering as debreak_cluster
 import debreak_merge
 #import denovo_baseerror
@@ -12,14 +12,13 @@ import time
 
 t0=time.time()
 
-parser=argparse.ArgumentParser(description='de novo assembly evaluator', usage='inspector.py [-h] -c contig.fa -r raw_reads.fa -o output_dict/')
+parser=argparse.ArgumentParser(description='de novo assembly evaluator', usage='inspector.py [-h] -c contig.fa -r raw_reads.fastq -o output_dict/')
 parser.add_argument('--version', action='version', version='Inspector_v1.0.1')
-parser.add_argument('-c','--contig',action='append', dest='contigfile',default=[],help='assembly contigs in .fa format',required=True)
-#parser.add_argument('-r','--read',type=str,default=False,help='sequencing reads in .fa format',required=True)
-parser.add_argument('-r','--read',type=str,default=False,help='sequencing reads in .fa format',required=True,nargs='+')
+parser.add_argument('-c','--contig',action='append', dest='contigfile',default=[],help='assembly contigs in FASTA format',required=True)
+parser.add_argument('-r','--read',type=str,default=False,help='sequencing reads in FASTA/FASTQ format',required=True,nargs='+')
 parser.add_argument('-d','--datatype',type=str,default='clr',help='Input read type. (clr, hifi, nanopore) [clr]')
 parser.add_argument('-o','--outpath',type=str,default='./adenovo_evaluation-out/',help='output directory')
-parser.add_argument('--ref',type=str,default=False,help='OPTIONAL reference genome in .fa format')
+parser.add_argument('--ref',type=str,default=False,help='OPTIONAL reference genome in FASTA format')
 
 #parser.add_argument('--depth_plot',action='store_true',help='plot depth at all contigs.')
 parser.add_argument('-t','--thread',type=int,default=8,help='number of threads. [8]')

@@ -90,6 +90,11 @@ def mapping_info_ctg(outpath,largechrom,smallchrom,contiglength,contiglength_lar
 	f=open(outpath+'summary_statistics','a')
 	f.write('Read to Contig alignment:\n')
 
+	os.system('touch '+outpath+'map_depth/maplength_large_null')
+	os.system('touch '+outpath+'map_depth/readnum_large_null')
+	os.system('touch '+outpath+'map_depth/splitread_large_null')
+	
+
 	os.system('cat '+outpath+'map_depth/maplength_large_* > '+outpath+'map_depth/all_maplength_large')
 	os.system('cat '+outpath+'map_depth/maplength_* > '+outpath+'map_depth/all_maplength_total')
 	os.system('cat '+outpath+'map_depth/readnum_large_* > '+outpath+'map_depth/all_readnum_large')
@@ -229,7 +234,7 @@ def assembly_info_ref(outpath):
 	allins+=alldup
 	allsv=alldel+allins
 	allsv.sort(key=sort_sv)
-	f=open(outpath+'assembly_errors_ref.bed','w')
+	f=open(outpath+'structural_errors_ref.bed','w')
 	for c in allsv:
 		if 'Ins' in c or 'Dup' in c:
 			c=c.split('\t')
@@ -340,7 +345,7 @@ def basepair_error_ref(outpath,largestchr):
 	f.write('Number of single basepair error\t'+str(snp)+'\n')
 	f.write('Base pair accuracy\t'+str(accuracy)+'\n\n\n')
 	f.close()
-	f=open(outpath+'assembly_basepair_error_ref','w')
+	f=open(outpath+'small_scale_error_ref.bed','w')
 	for c in svs:
 		f.write(c+'\n')
 	f.close()
@@ -477,45 +482,3 @@ def check_depth_ref(outpath,ref):
 	
 	return 0
 
-if __name__ == '__main__':
-	#ty=sys.argv[1]
-	#outpath='/data/scratch/maggic/Inspector_results/simulation_clr/'+ty+'/'
-	outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/flye_ccs/'
-	#outpath='/data/scratch/maggic/Inspector_results/simulation_clr/flye_clr/'
-	#ref='/data/scratch/maggic/simulation/denovosimulation/halploid_chr1/chr1.fa'
-	#check_depth_ref(outpath,ref)
-	#info=get_ref_chroms(outpath)
-	#contigfile=['/data/scratch/maggic/HGSVC_results/HG00514/HG00514_hgsvc_pbsq2-ccs_1000-pereg.h1-un.racon-p2.fasta','/data/scratch/maggic/HGSVC_results/HG00514/HG00514_hgsvc_pbsq2-ccs_1000-pereg.h2-un.racon-p2.fasta']
-
-
-	get_ref_align_info(outpath,2960295001);quit()
-
-	assembly_info(outpath);quit()
-
-#	for tool in range(1,6):
-	for tool in ['canu','flye','wtdbg','hifiasm']:
-		for ty in ['ccs','clr']:
-		#outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/racon_polish'+str(tool)+'/'
-			try:
-				outpath='/data/scratch/maggic/Inspector_results/simulation_'+ty+'/'+tool+'_'+ty+'/'
-				assembly_info(outpath)
-			except:
-				pass
-	quit()
-
-
-	largestchr='HAP_2_cluster3_000000F'
-	basepair_error_ref(outpath,largestchr)
-	quit()
-
-	min_size=10000
-	min_size_assemblyerror=1000000
-	#[all_contigs,map_contigs,large_contigs,totallength,totallength_large,maxcontig,maxlen]
-	ref='/data/user/maggic/svstudy/data/reference/hg38.fa'
-	import time
-	t1=time.time()
-	#check_depth_ref(outpath,ref)
-	mapping_info_ctg(outpath)
-
-	t2=time.time()
-	print t2-t1

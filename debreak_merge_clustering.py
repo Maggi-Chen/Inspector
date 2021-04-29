@@ -440,7 +440,7 @@ def filterae(depth,outpath,min_size,datatype):
                 if int(c.split('\t')[3]) >=10 and int(c.split('\t')[3])>=(rat-0.2)*int(c.split('\t')[9]) and lowcov<=int(c.split('\t')[9])<highcov and max([int(m) for m in c.split('\t')[5].split('=')[1].split(';')])>=1000:
                         new+=[c]
 	'''
-        f=open(outpath+'assembly_errors.bed-gt_filtered_newtest','w')
+        f=open(outpath+'structural_error.bed','w')
         for c in new:
                 f.write(c+'\n')
         f.close()
@@ -455,6 +455,8 @@ def filterae(depth,outpath,min_size,datatype):
 	f.write('\nHeterozygosis error: '+str(het)+'\nInversion: '+str(inv)+'\n')
 	f.close()
 
+	os.system('rm '+outpath+'assembly_errors.bed*')
+
 	totalbase=0
 	for c in new:
 		if 'Inv' in c:
@@ -466,41 +468,3 @@ def filterae(depth,outpath,min_size,datatype):
 
 
 
-if __name__ =="__main__":
-	#t=sys.argv[1]
-	#ty=sys.argv[2]
-
-	filterae(79.0337,'/data/scratch/maggic/Inspector_results/hg002_error_evaluation_before_two/canu_ccs/',45,'hifi')
-	
-	quit()
-
-	for t in ['canu','flye','wtpoa']:
-		for ty in ['10','20','30','40','50','60']:
-	#for t in ['dip','hap']:
-#		for ty in ['clr']:
-			path='/data/scratch/maggic/Inspector_results/hg002_clr_downsample/'+t+'_'+ty+'/'
-			#path='/data/scratch/maggic/Inspector_results/sim_contig/'+t+'_'+ty+'/'
-			try:
-				depth=open(path+'summary_statistics','r').read().split('\n')
-			except:
-				continue
-			print t,ty
-			depth=float([c for c in depth if 'Depth:' in c][0].split('\t')[1])
-			filterae(depth,path,45,'clr')
-	quit()
-
-	t='wtpoa'
-	ty='ccs_preset'
-	t=sys.argv[1]
-	ty=sys.argv[2]
-
-	outpath='/data/scratch/maggic/Inspector_results/simulation_'+'ccs'+'/'+t+'_'+ty+'/'
-	alllen=open(outpath+'contig_length_info','r').read().split('\n')[:-1]
-
-	for c in alllen:
-		if int(c.split('\t')[1])>1000000:
-			cluster_ins(outpath,c.split('\t')[0],int(c.split('\t')[1]),7,100,t,ty)
-			cluster(outpath,c.split('\t')[0],int(c.split('\t')[1]),7,100,t,ty)
-
-	ttt=time.time()
-	print 'Total Time  ',ttt-tt

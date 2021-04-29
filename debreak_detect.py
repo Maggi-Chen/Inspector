@@ -371,8 +371,8 @@ def detect_sortbam(workpath,min_size,max_size,chrom):
 		readinfo=[readname,flag,chrom,position,refend,cigar_info,mappingquality]
 		if align.is_supplementary:
 			cigar=align.cigarstring
-			cigarinfo=cigardeletion(flag,chrom,position,cigar,min_size,max_size)
-			cigarsv=cigarinfo[0]
+			cigarinfo=cigardeletion(flag,chrom,position,cigar,5,max_size)
+			cigarsv=[mm for mm in cigarinfo[0] if int(mm[2])>=min_size]
 			for d in cigarsv:
 				tempfile.write(d[0]+'\t'+str(d[1])+'\t'+str(d[2])+'\t'+d[3]+'\t'+readname+'\t'+str(flag)+'\t'+str(mappingquality)+'\n')
 
@@ -389,8 +389,8 @@ def detect_sortbam(workpath,min_size,max_size,chrom):
 			totalmaplength+=align.query_length
 			number_read+=1
 			cigar=align.cigarstring
-			cigarinfo=cigardeletion(flag,chrom,position,cigar,min_size,max_size)
-			cigarsv=cigarinfo[0]
+			cigarinfo=cigardeletion(flag,chrom,position,cigar,5,max_size)
+			cigarsv=[mm for mm in cigarinfo[0] if int(mm[2])>=min_size]
 			for d in cigarsv:
 				tempfile.write(d[0]+'\t'+str(d[1])+'\t'+str(d[2])+'\t'+d[3]+'\t'+readname+'\t'+str(flag)+'\t'+str(mappingquality)+'\n')
 
@@ -494,8 +494,6 @@ def detect_sam_ref(filename,readpath,writepath,min_size,max_size):
 			c=f.readline()
 			continue
 
-
-
 		refend=position+cigarinfo[1]
 		cimplecigar=str(cigarinfo[2][0])+'\t'+str(cigarinfo[2][1])+'\t'+str(cigarinfo[2][2])
 		# if primary: write deletions from cigar string
@@ -533,28 +531,4 @@ def detect_sam_ref(filename,readpath,writepath,min_size,max_size):
 	return [unmapped,mapped,len(multimap),totalmappedlength]
 
 		
-
-if __name__ =="__main__":
-	readpath='/data/scratch/maggic/Inspector_results/simulation_ccs/canu_ccs/'
-	#readpath='/data/scratch/maggic/Inspector_results/simulation_wtdbg_asm20_ref/dip_clr/'
-	workpath=readpath
-	#filename='contig_to_ref.sam'
-	#detect_sam_ref(filename,readpath,writepath,50,400000000)
-	#detect_sortbam('/data/scratch/maggic/HGSVC_results/HG00514/inspector_ccs_un_racon_new/',50,20000,'HAP_1_cluster24_000043F',False)
-	detect_sam_ref("contig_to_ref.sam",readpath,readpath,10,40000000)
-	#detect_sortbam(workpath,20,4000000000,'tig00021351')
-
-	#filename='read_to_contig.sam'
-	#chrom for haploid sim
-	#chromosomes=['ctg1','ctg2','ctg3','ctg4','ctg5','ctg6','ctg7','ctg8','ctg9','ctg10','ctg11','ctg12','ctg13','ctg14','ctg15','ctg16','ctg17','ctg18','ctg19','ctg20','ctg21','ctg22','ctg23','ctg24','ctg25']
-	#filename='read_to_large_contig.sam'
-	#chromosomes=['tig00000035','tig00000109','tig00000141','tig00000148','tig00000154','tig00000190','tig00000224','tig00000264','tig00000359','tig00000419','tig00000446','tig00000506','tig00000589','tig00000676','tig00021687','tig00021690','tig00021694','tig00021695','tig00043385','tig00043387']
-	#chromosomes=['scaffold_5','contig_9','contig_10','contig_12','contig_15','contig_17','contig_20','contig_22','contig_27','contig_28','contig_33','scaffold_36','contig_54','contig_55','contig_62','contig_69','contig_98','scaffold_111','contig_190','contig_225','scaffold_239']
-
-	#chrom for diploid sim
-	#chromosomes=['tig00022707','tig00022710','tig00022728','tig00022729','tig00022720','tig00000463','tig00022716','tig00000369','tig00022725','tig00000565','tig00022714','tig00000613','tig00022709','tig00022723','tig00000747','tig00000902','tig00000943','tig00000959','tig00001050','tig00022736','tig00022734','tig00001232','tig00022721','tig00001347']
-	#chromosomes=['contig_10','contig_14','contig_18','contig_2','contig_20','contig_24','contig_26','contig_28','contig_35','contig_4','contig_44','contig_6','contig_8','contig_82','contig_86','contig_9','scaffold_21','scaffold_30','scaffold_69']
-	#chromosomes=['ctg1','ctg2','ctg3','ctg4','ctg5','ctg6','ctg7','ctg8','ctg9','ctg10','ctg11','ctg12','ctg13','ctg14','ctg15','ctg16','ctg17','ctg18','ctg19','ctg20','ctg21','ctg22','ctg23','ctg24','ctg25','ctg26','ctg27']
-
-	#detect_sam(filename,readpath,writepath,chromosomes,50,400000000)
 
