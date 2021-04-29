@@ -169,7 +169,7 @@ if aelen_structuralerror+aelen_baseerror>0:
 	print aelen_baseerror, aelen_structuralerror,totalcontiglen
 	qv=-10 * math.log10(float(aelen_baseerror+aelen_structuralerror)/totalcontiglen)
 	f=open(denovo_args.outpath+'summary_statistics','a')
-	f.write('\nQV: '+str(qv)+'\n')
+	f.write('\nQV\t'+str(qv)+'\n')
 	f.close()
 
 t6=time.time()
