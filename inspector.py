@@ -2,7 +2,7 @@
 import os
 import argparse
 import denovo_static
-import debreak_detect_test as debreak_detect
+import debreak_detect
 import debreak_merge_clustering as debreak_cluster
 import debreak_merge
 #import denovo_baseerror
@@ -12,14 +12,13 @@ import time
 
 t0=time.time()
 
-parser=argparse.ArgumentParser(description='de novo assembly evaluator', usage='inspector.py [-h] -c contig.fa -r raw_reads.fa -o output_dict/')
+parser=argparse.ArgumentParser(description='de novo assembly evaluator', usage='inspector.py [-h] -c contig.fa -r raw_reads.fastq -o output_dict/')
 parser.add_argument('--version', action='version', version='Inspector_v1.0.1')
-parser.add_argument('-c','--contig',action='append', dest='contigfile',default=[],help='assembly contigs in .fa format',required=True)
-#parser.add_argument('-r','--read',type=str,default=False,help='sequencing reads in .fa format',required=True)
-parser.add_argument('-r','--read',type=str,default=False,help='sequencing reads in .fa format',required=True,nargs='+')
+parser.add_argument('-c','--contig',action='append', dest='contigfile',default=[],help='assembly contigs in FASTA format',required=True)
+parser.add_argument('-r','--read',type=str,default=False,help='sequencing reads in FASTA/FASTQ format',required=True,nargs='+')
 parser.add_argument('-d','--datatype',type=str,default='clr',help='Input read type. (clr, hifi, nanopore) [clr]')
 parser.add_argument('-o','--outpath',type=str,default='./adenovo_evaluation-out/',help='output directory')
-parser.add_argument('--ref',type=str,default=False,help='OPTIONAL reference genome in .fa format')
+parser.add_argument('--ref',type=str,default=False,help='OPTIONAL reference genome in FASTA format')
 
 #parser.add_argument('--depth_plot',action='store_true',help='plot depth at all contigs.')
 parser.add_argument('-t','--thread',type=int,default=8,help='number of threads. [8]')
@@ -69,6 +68,10 @@ elif len(denovo_args.contigfile)==2:
 else:
 	print 'Error: Input contig file should be either 1 fasta file or two halploid.fa files. Check input -c/--contig.'
 	quit()
+
+if not denovo_args.skip_base_error:
+	import denovo_baseerror
+
 
 # Simple statistics of contigs	
 contiginfo=denovo_static.simple(denovo_args.contigfile,denovo_args.outpath,denovo_args.min_contig_length,denovo_args.min_contig_length_assemblyerror)
@@ -128,7 +131,7 @@ cov=denovo_static.mapping_info_ctg(denovo_args.outpath,chromosomes_large,chromos
 minsupp=round(cov/10.0)
 
 t3=time.time()
-print 'TIME: Raw sv detection: ',t3-t2
+print 'TIME: Structural error signal detection: ',t3-t2
 
 aelen_structuralerror=0
 if not denovo_args.skip_structural_error:
@@ -144,12 +147,11 @@ if not denovo_args.skip_structural_error:
 	aelen_structuralerror=debreak_cluster.filterae(cov,denovo_args.outpath,denovo_args.min_assembly_error_size,denovo_args.datatype)
 
 t4=time.time()
-print 'TIME: SV clustering : ',t4-t3
+print 'TIME: Structural error clustering : ',t4-t3
 
 # SNP & indel detection
 aelen_baseerror=0
 if not denovo_args.skip_base_error:
-	import denovo_baseerror
 	if not denovo_args.skip_base_error_detect:
 		os.system('samtools faidx '+denovo_args.outpath+'valid_contig.fa')
 		debreak_det=multiprocessing.Pool(denovo_args.thread)
@@ -163,14 +165,14 @@ if not denovo_args.skip_base_error:
 	aelen_baseerror=denovo_baseerror.count_baseerrror(denovo_args.outpath,totalcontiglen,denovo_args.datatype)
 
 t5=time.time()
-print 'TIME: SNV calling: ',t5-t4
+print 'TIME: Small-scale error detection: ',t5-t4
 
 #QV
 if aelen_structuralerror+aelen_baseerror>0:
 	print aelen_baseerror, aelen_structuralerror,totalcontiglen
 	qv=-10 * math.log10(float(aelen_baseerror+aelen_structuralerror)/totalcontiglen)
 	f=open(denovo_args.outpath+'summary_statistics','a')
-	f.write('\nQV: '+str(qv)+'\n')
+	f.write('\nQV\t'+str(qv)+'\n')
 	f.close()
 
 t6=time.time()
@@ -206,5 +208,5 @@ if denovo_args.ref:
 	denovo_static.basepair_error_ref(denovo_args.outpath,contiginfo[5])
 
 t7=time.time()
-print 'TIME: ref based mode: ',t7-t6
+print 'TIME: Reference-based mode: ',t7-t6
 

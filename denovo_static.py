@@ -57,13 +57,6 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 	f.close()
 	f=open(outpath+'summary_statistics','w')
 	f.write('Statics of contigs:\n')
-	f.write('Number of contigs\t'+str(len(length))+'\n')
-	f.write('Total length\t'+str(sum(length))+'\n')
-	f.write('Longest contig\t'+str(length[0])+'\n')
-	if len(length)>1:
-		f.write('Second longest contig length\t'+str(length[1])+'\n')
-	f.write('Number of contigs > '+str(min_size)+' bp:\t'+str(len(map_contigs))+'\n')
-	f.write('Total length of contigs > '+str(min_size)+' bp:\t'+str(totallength)+'\n')
 
 	iii=0
 	total=sum(length)/2
@@ -71,10 +64,22 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 		iii+=c
 		if iii>=total:
 			n50=c; break
+	length_ae=[c for c in length if c > min_size_assemblyerror]
+
+
+	f.write('Number of contigs\t'+str(len(length))+'\n')
+	f.write('Number of contigs > '+str(min_size)+' bp\t'+str(len(map_contigs))+'\n')
+	f.write('Number of contigs >'+str(min_size_assemblyerror)+' bp\t'+str(len(length_ae))+'\n')
+	f.write('Total length\t'+str(sum(length))+'\n')
+	f.write('Total length of contigs > '+str(min_size)+' bp\t'+str(totallength)+'\n')
+	f.write('Total length of contigs >'+str(min_size_assemblyerror)+'bp\t'+str(sum(length_ae))+'\n')
+	f.write('Longest contig\t'+str(length[0])+'\n')
+	if len(length)>1:
+		f.write('Second longest contig length\t'+str(length[1])+'\n')
 	f.write('N50\t'+str(n50)+'\n')
-	length=[c for c in length if c > min_size_assemblyerror]
-	f.write('Number of contigs >'+str(min_size_assemblyerror)+'bp\t'+str(len(length))+'\n')
-	f.write('Total length of contigs >'+str(min_size_assemblyerror)+'bp\t'+str(sum(length))+'\n')
+
+	
+
 	iii=0; total=sum(length)/2; n50=0
 	for c in length:
 		iii+=c
@@ -89,6 +94,11 @@ def mapping_info_ctg(outpath,largechrom,smallchrom,contiglength,contiglength_lar
 
 	f=open(outpath+'summary_statistics','a')
 	f.write('Read to Contig alignment:\n')
+
+	os.system('touch '+outpath+'map_depth/maplength_large_null')
+	os.system('touch '+outpath+'map_depth/readnum_large_null')
+	os.system('touch '+outpath+'map_depth/splitread_large_null')
+	
 
 	os.system('cat '+outpath+'map_depth/maplength_large_* > '+outpath+'map_depth/all_maplength_large')
 	os.system('cat '+outpath+'map_depth/maplength_* > '+outpath+'map_depth/all_maplength_total')
@@ -106,32 +116,32 @@ def mapping_info_ctg(outpath,largechrom,smallchrom,contiglength,contiglength_lar
 		print 'Warning: No read found.'
 		return 0
 	mapprate=round(10000*float(mapped)/(totalread))/100.0
-	f.write('Mapping rate /%:\t'+str(mapprate)+'\n')
+	f.write('Mapping rate /%\t'+str(mapprate)+'\n')
 
 	info=open(outpath+'map_depth/all_splitread_total','r').read().split('\n')[:-1]
 	splitread=sum([int(ccc) for ccc in info])
 	splrate=round(10000*float(splitread)/mapped)/100.0
-	f.write('Split-read rate /%:'+str(splrate)+'\n')
+	f.write('Split-read rate /%\t'+str(splrate)+'\n')
 
 	info=open(outpath+'map_depth/all_maplength_total','r').read().split('\n')[:-1]
 	mappedlen=sum([int(ccc) for ccc in info])
 	cov=round(10000*float(mappedlen)/contiglength)/10000.0
-	f.write('Depth:\t'+str(cov)+'\n')
+	f.write('Depth\t'+str(cov)+'\n')
 
 	info=open(outpath+'map_depth/all_readnum_large','r').read().split('\n')[:-1]
 	mapped=sum([int(ccc) for ccc in info])
 	mapprate=round(10000*float(mapped)/(totalread))/100.0
-	f.write('Mapping rate in large contigs /%:\t'+str(mapprate)+'\n')
+	f.write('Mapping rate in large contigs /%\t'+str(mapprate)+'\n')
 
 	info=open(outpath+'map_depth/all_splitread_large','r').read().split('\n')[:-1]
 	splitread=sum([int(ccc) for ccc in info])
 	splrate=round(10000*float(splitread)/mapped)/100.0
-	f.write('Split-read rate in large contigs /%:\t'+str(splrate)+'\n')
+	f.write('Split-read rate in large contigs /%\t'+str(splrate)+'\n')
 
 	info=open(outpath+'map_depth/all_maplength_large','r').read().split('\n')[:-1]
 	mappedlen=sum([int(ccc) for ccc in info])
 	cov=round(10000*float(mappedlen)/contiglength_large)/10000.0
-	f.write('Depth in large conigs:\t'+str(cov)+'\n\n\n')
+	f.write('Depth in large conigs\t'+str(cov)+'\n\n\n')
 	f.close()
 
 	return cov
@@ -200,17 +210,7 @@ def assembly_info(outpath):
 	f.write('Number of assembly collapse\t'+str(len(allins))+'\n')
 	f.write('Number of assembly expansion\t'+str(len(alldel))+'\n')
 	f.write('Number of assembly inversion\t'+str(len(allinv))+'\n')
-	'''
-	alldel=[c for c in alldel if c.split('\t')[0] in chromosomes]
-	allins=[c for c in allins if c.split('\t')[0] in chromosomes]
-	allinv=[c for c in allinv if c.split('\t')[0] in chromosomes]
-
-	f.write('Number of assembly collapse in large contigs\t'+str(len(allins))+'\n')
-	f.write('Number of assembly expansion in large contigs\t'+str(len(alldel))+'\n')
-	f.write('Number of assembly inversion in large contigs\t'+str(len(allinv))+'\n\n\n')
-	'''
 	f.close()
-	#os.system("rm "+outpath+"*ion-merged")
 	return 0
 
 def assembly_info_ref(outpath):
@@ -229,7 +229,7 @@ def assembly_info_ref(outpath):
 	allins+=alldup
 	allsv=alldel+allins
 	allsv.sort(key=sort_sv)
-	f=open(outpath+'assembly_errors_ref.bed','w')
+	f=open(outpath+'structural_errors_ref.bed','w')
 	for c in allsv:
 		if 'Ins' in c or 'Dup' in c:
 			c=c.split('\t')
@@ -340,7 +340,7 @@ def basepair_error_ref(outpath,largestchr):
 	f.write('Number of single basepair error\t'+str(snp)+'\n')
 	f.write('Base pair accuracy\t'+str(accuracy)+'\n\n\n')
 	f.close()
-	f=open(outpath+'assembly_basepair_error_ref','w')
+	f=open(outpath+'small_scale_error_ref.bed','w')
 	for c in svs:
 		f.write(c+'\n')
 	f.close()
@@ -424,12 +424,12 @@ def get_ref_align_info(path,totallength):
 	base0=totalrefbase-base1-base2-base3
 	f=open(path+'summary_statistics','a')
 	f.write('\n\n\nReference-based mode:\n')
-	f.write('Genome Coverage /%: '+str(float(base1+base2+base3)/totalrefbase)+'\nReference base with Depth=0 (including Ns): '+str(base0)+';\t'+str(base0/float(totalrefbase)*100)+'%\n')
-	f.write('Reference base with Depth=1: '+str(base1)+';\t'+str(base1/float(totalrefbase)*100)+'%\n')
-	f.write('Reference base with Depth=2: '+str(base2)+';\t'+str(base2/float(totalrefbase)*100)+'%\n')
-	f.write('Reference base with Depth>2: '+str(base3)+';\t'+str(base3/float(totalrefbase)*100)+'%\n')
-	f.write('Assembly contig mapping ratio (length): /%'+str(assembly_maplenratio)+'\n')
-	f.write('Assembly contig NA50: '+str(na50)+'\n')
+	f.write('Genome Coverage /% '+str(float(base1+base2+base3)/totalrefbase)+'\nReference base with Depth=0 (including Ns): '+str(base0)+';\t'+str(base0/float(totalrefbase)*100)+'%\n')
+	f.write('Reference base with Depth=1 '+str(base1)+';\t'+str(base1/float(totalrefbase)*100)+'%\n')
+	f.write('Reference base with Depth=2 '+str(base2)+';\t'+str(base2/float(totalrefbase)*100)+'%\n')
+	f.write('Reference base with Depth>2 '+str(base3)+';\t'+str(base3/float(totalrefbase)*100)+'%\n')
+	f.write('Assembly contig mapping ratio (length) /%'+str(assembly_maplenratio)+'\n')
+	f.write('Assembly contig NA50 '+str(na50)+'\n')
 	f.close()
 
 	return allrefchrom
@@ -468,54 +468,12 @@ def check_depth_ref(outpath,ref):
 	total=cov0+cov1+cov2+cov3
 	
 	f=open(outpath+'summary_statistics','a')
-	f.write('#BP with cov=0:   '+str(cov0)+',  '+str(cov0*100.00/total)+'\n')
-	f.write('#BP with cov=1:   '+str(cov1)+',  '+str(cov1*100.00/total)+'\n')
-	f.write('#BP with cov=2:   '+str(cov2)+',  '+str(cov2*100.00/total)+'\n')
-	f.write('#BP with cov>2:   '+str(cov3)+',  '+str(cov3*100.00/total)+'\n')
+	f.write('#BP with cov=0   '+str(cov0)+',  '+str(cov0*100.00/total)+'\n')
+	f.write('#BP with cov=1   '+str(cov1)+',  '+str(cov1*100.00/total)+'\n')
+	f.write('#BP with cov=2   '+str(cov2)+',  '+str(cov2*100.00/total)+'\n')
+	f.write('#BP with cov>2   '+str(cov3)+',  '+str(cov3*100.00/total)+'\n')
 	f.write('Coverage:  '+str(1-round(10000*float(cov0)/total)/10000.0)+'\n')
 	f.close()
 	
 	return 0
 
-if __name__ == '__main__':
-	#ty=sys.argv[1]
-	#outpath='/data/scratch/maggic/Inspector_results/simulation_clr/'+ty+'/'
-	outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/flye_ccs/'
-	#outpath='/data/scratch/maggic/Inspector_results/simulation_clr/flye_clr/'
-	#ref='/data/scratch/maggic/simulation/denovosimulation/halploid_chr1/chr1.fa'
-	#check_depth_ref(outpath,ref)
-	#info=get_ref_chroms(outpath)
-	#contigfile=['/data/scratch/maggic/HGSVC_results/HG00514/HG00514_hgsvc_pbsq2-ccs_1000-pereg.h1-un.racon-p2.fasta','/data/scratch/maggic/HGSVC_results/HG00514/HG00514_hgsvc_pbsq2-ccs_1000-pereg.h2-un.racon-p2.fasta']
-
-
-	get_ref_align_info(outpath,2960295001);quit()
-
-	assembly_info(outpath);quit()
-
-#	for tool in range(1,6):
-	for tool in ['canu','flye','wtdbg','hifiasm']:
-		for ty in ['ccs','clr']:
-		#outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/racon_polish'+str(tool)+'/'
-			try:
-				outpath='/data/scratch/maggic/Inspector_results/simulation_'+ty+'/'+tool+'_'+ty+'/'
-				assembly_info(outpath)
-			except:
-				pass
-	quit()
-
-
-	largestchr='HAP_2_cluster3_000000F'
-	basepair_error_ref(outpath,largestchr)
-	quit()
-
-	min_size=10000
-	min_size_assemblyerror=1000000
-	#[all_contigs,map_contigs,large_contigs,totallength,totallength_large,maxcontig,maxlen]
-	ref='/data/user/maggic/svstudy/data/reference/hg38.fa'
-	import time
-	t1=time.time()
-	#check_depth_ref(outpath,ref)
-	mapping_info_ctg(outpath)
-
-	t2=time.time()
-	print t2-t1

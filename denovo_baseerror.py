@@ -149,9 +149,13 @@ def count_baseerrror(path,ctgtotallen,datatype):
 	if datatype=='hifi':
 		propvalue=0.5
 		pcutoff=0.01
+		readcutoff=0.75
 	else:
 		propvalue=0.4
 		pcutoff=0.05
+		readcutoff=0.5
+
+
 
 	allpvalue=[]
 
@@ -162,13 +166,15 @@ def count_baseerrror(path,ctgtotallen,datatype):
 		p=0
 		nread=int(c.split('\t')[5])
 		depth=int(c.split('\t')[6])
+		if nread<readcutoff*depth:
+			continue
 		for i in range(nread,depth+1):
 			p+=statsmodels.stats.proportion.binom_test(i, depth, prop=propvalue, alternative='larger')
 
 		#baseerror+=[c+'\t'+str(p)]
 		#allpvalue+=[p]
 		
-		if p<pcutoff:
+		if p<pcutoff :
                         iii+=1
 			baseerror+=[c+'\t'+str(p)]
 			if 'SNP' in c:
@@ -179,41 +185,17 @@ def count_baseerrror(path,ctgtotallen,datatype):
 				indelins+=1
 		
         per=float(iii)/ctgtotallen*1000000
-	f=open(path+'small_scale_error_p0.01_newtest.bed','w')
+	f=open(path+'small_scale_error.bed','w')
 	for c in baseerror:
 		f.write(c+'\n')
 	f.close()
-	#quit()
 	f=open(path+'summary_statistics','a')
-	f.write('\n\nSmall-scale assembly error /per Mbp: '+str(per)+'\nTotal small-scale assembly error: '+str(iii)+'\nBase substitution: '+str(snv)+'\nSmall-scale expansion: '+str(indeldel)+'\n')
-	f.write('Small-scale collapse: '+str(indelins)+'\n')
+	f.write('\n\nSmall-scale assembly error /per Mbp\t'+str(per)+'\nTotal small-scale assembly error\t'+str(iii)+'\nBase substitution\t'+str(snv)+'\nSmall-scale expansion\t'+str(indeldel)+'\n')
+	f.write('Small-scale collapse\t'+str(indelins)+'\n')
 
 	return iii	
 
 	
-
-if __name__ =="__main__":
-	
-	import sys
-
-	t=sys.argv[3]
-	ty=sys.argv[2]
-	datatype=sys.argv[1]
-
-	count_baseerrror('/data/scratch/maggic/Inspector_results/hg002_wholegenome_testruntime/'+t+'_'+ty+'/',10000000,datatype);quit()
-
-	for t in ['canu','flye','wtpoa','hifiasm','shasta']:
-#		for ty in ['10','20','30','40','50','60']:
-		for ty in ['ccs']:
-#			path='/data/scratch/maggic/Inspector_results/hg002_clr_downsample/'+t+'_'+ty+'/'
-			path='/data/scratch/maggic/Inspector_results/hg002_wholegenome_testruntime/'+t+'_'+ty+'/'
-			summ=open(path+'contig_length_info','r').read().split('\n')[:-1]
-			totalctglen=sum([int(c.split('\t')[1]) for c in summ if int(c.split('\t')[1])>10000 ])
-	
-			count_baseerrror(path,totalctglen,'hifi')
-
-
-
 
 
 
