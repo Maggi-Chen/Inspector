@@ -26,7 +26,7 @@ inspector.py -c contig.fa -r rawreads.1.fastq --ref reference.fa -o inspector_ou
 inspector.py -c contig.fa -r emptyfile --ref reference.fa -o inspector_out/ 
 
 # Error correction
-inspector-correct.py -i inspector_out/ --datatype hifi -o inspector_out/
+inspector-correct.py -i inspector_out/ --datatype pacbio-hifi -o inspector_out/
 
 ```
 
