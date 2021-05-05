@@ -79,7 +79,7 @@ inspector.py -h
 
 A test dataset is available to verify successful installation:
 ```
-./inspector.py -c testdata/contig_test.fa -r testdata/read_test.fastq -o test_out/ --datatype hifi 
+./inspector.py -c testdata/contig_test.fa -r testdata/read_test.fastq.gz -o test_out/ --datatype hifi 
 ./inspector-correct.py -i test_out/ --datatype pacbio-hifi 
 ```
 (The Inspector evaluation on test dataset should finish within several minutes with 4 CPUs and 400MB memory.
