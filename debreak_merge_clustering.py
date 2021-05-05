@@ -77,7 +77,6 @@ def counttimesort(a):
         return [int(a.split('\t')[1]),int(a.split('\t')[2])]
 
 def cluster(outpath,chrom,contiglength,mins,maxdepth):
-	t1=time.time()
 	#allsv=open(outpath+'read_to_contig_'+chrom+'.debreak.temp','r').read().split('\n')[:-1]
 	allsv=open(outpath+'debreak_workspace/read_to_contig_'+chrom+'.debreak.temp','r').read().split('\n')[:-1]
 
@@ -105,7 +104,6 @@ def cluster(outpath,chrom,contiglength,mins,maxdepth):
 	#smaller DEL
 	allsv=[c for c in allsv if 'D-' in c and int(c.split('\t')[2])<=3000]
 
-	print len(allsv)
 
 	genomeposition=[0]*contiglength
 
@@ -129,12 +127,7 @@ def cluster(outpath,chrom,contiglength,mins,maxdepth):
 				inblock=False
 				end=i
 				if maxdep<=maxdepth:
-					try:
-						peakpos=localdep.index(maxdep)
-					except:
-						print start,end,maxdep
-						print localdep
-						a=input()
+					peakpos=localdep.index(maxdep)
 					peakleftsize=0
 					for i in range(peakpos):
 						if localdep[peakpos-i-1]>=maxdep/10.0:
@@ -181,8 +174,6 @@ def cluster(outpath,chrom,contiglength,mins,maxdepth):
 	newsv+=sv
 	newsv.sort(key=counttimesort)
 
-	t2=time.time()
-	print chrom,t2-t1
 
 	if newsv==[]:
 		return 0
@@ -198,7 +189,6 @@ def cluster(outpath,chrom,contiglength,mins,maxdepth):
 
 
 def cluster_ins(outpath,chrom,contiglength,mins,maxdepth,svtype):
-	t1=time.time()
         allsv=open(outpath+'debreak_workspace/read_to_contig_'+chrom+'.debreak.temp','r').read().split('\n')[:-1]
 	
         # Large INS
@@ -232,7 +222,6 @@ def cluster_ins(outpath,chrom,contiglength,mins,maxdepth,svtype):
 		allsv=[c for c in allsv if 'INV-' in c and int(c.split('\t')[2])<=3000]
 
 
-        print len(allsv)
 
         genomeposition=[0]*contiglength
 
@@ -257,12 +246,7 @@ def cluster_ins(outpath,chrom,contiglength,mins,maxdepth,svtype):
                                 inblock=False
                                 end=i
                                 if maxdep<=maxdepth:
-                                        try:
-                                                peakpos=localdep.index(maxdep)
-                                        except:
-                                                print start,end,maxdep
-                                                print localdep
-                                                a=input()
+                                        peakpos=localdep.index(maxdep)
                                         peakleftsize=0
                                         for i in range(peakpos):
                                                 if localdep[peakpos-i-1]>=maxdep/10.0:
@@ -313,8 +297,6 @@ def cluster_ins(outpath,chrom,contiglength,mins,maxdepth,svtype):
         newsv+=sv
         newsv.sort(key=counttimesort)
 
-        t2=time.time()
-        print chrom,t2-t1
 
 	if newsv==[]:
 		return 0
@@ -347,19 +329,14 @@ def genotype(depth,outpath):
                 chrom=c.split('\t')[0]
                 start=int(c.split('\t')[1])
                 stop=int(c.split('\t')[2])
-                #print (c)
                 if start<0:
                         continue
                 if 'Expansion' in c or 'Inversion' in c:
                         leftcov=samfile.count(chrom,max(start-100,0),start,read_callback='all')
                         rightcov=samfile.count(chrom,stop,stop+100,read_callback='all')
-                        #if leftcov>highcov and rightcov>highcov:
-                #               continue
                 if 'Collapse' in c:
                         leftcov=samfile.count(chrom,max(0,start-100),start,read_callback='all')
                         rightcov=samfile.count(chrom,stop,stop+100,read_callback='all')
-                #       if leftcov>highcov and rightcov>highcov:
-                #               continue
                 gtinfo='./.'
                 if int(c.split('\t')[3])>=0.6*min(leftcov,rightcov):
                         gtinfo='1/1'
@@ -447,7 +424,7 @@ def filterae(depth,outpath,min_size,datatype):
 	het=len([mm for mm in new if 'Hete' in mm])
 	inv=len([mm for mm in new if 'Inv' in mm])
 	f=open(outpath+'summary_statistics','a')
-	f.write('\n\nStructural error\t'+str(len(new))+'\nExpansion\t'+str(exp)+'\nCollapse\t'+str(col))
+	f.write('Structural error\t'+str(len(new))+'\nExpansion\t'+str(exp)+'\nCollapse\t'+str(col))
 	f.write('\nHeterozygosis error\t'+str(het)+'\nInversion\t'+str(inv)+'\n')
 	f.close()
 
