@@ -10,13 +10,13 @@ def sort_snp(a):
 	return int(a.split('\t')[1])
 
 def get_snpcut_start(snp):
-        if snp.split('\t')[7] in ['SNP', 'Indel-ins']:
+        if snp.split('\t')[7] in ['BaseSubstitution', 'SmallCollapse']:
                 return int(snp.split('\t')[1])+1
         else:
                 return int(snp.split('\t')[2])+1
 
 def get_snpcut_end(snp):
-        if 'SNP' == snp.split('\t')[7]:
+        if 'BaseSubstitution' == snp.split('\t')[7]:
                 return int(snp.split('\t')[1])
         else:
                 return int(snp.split('\t')[1])+1
@@ -26,10 +26,9 @@ def base_correction(ctgseq,snpset,ctg):
         snpset.sort(key=sort_snp)
         bad=[]
         for i in range(len(snpset)-1):
-                if 'SNP' in snpset[i+1] and 'Indel-del' in snpset[i] and min(int(snpset[i+1].split('\t')[2]),int(snpset[i].split('\t')[2])+1)-max(int(snpset[i+1].split('\t')[1]),int(snpset[i].split('\t')[1])+1)>0:
+                if 'BaseSubstitution' in snpset[i+1] and 'SmallExpansion' in snpset[i] and min(int(snpset[i+1].split('\t')[2]),int(snpset[i].split('\t')[2])+1)-max(int(snpset[i+1].split('\t')[1]),int(snpset[i].split('\t')[1])+1)>0:
                         bad+=[snpset[i],snpset[i+1]]
         snpset=[c for c in snpset if c not in bad]
-        #snpset=[c for c in snpset if 'Indel-ins' not in c]
         cutposinfo=[]
 	if snpset==[]:
 		return (ctgseq,snpset)
@@ -38,12 +37,12 @@ def base_correction(ctgseq,snpset,ctg):
                 if i>0:
                         cutinfo[0]=get_snpcut_start(snpset[i-1])
                 cutinfo[1]=get_snpcut_end(snpset[i])
-                if 'Indel-del' == snpset[i].split('\t')[7]:
+                if 'SmallExpansion' == snpset[i].split('\t')[7]:
                         cutinfo[2]=''
-                elif snpset[i].split('\t')[7]== 'SNP' or snpset[i].split('\t')[7]== 'Indel-ins':
+                elif snpset[i].split('\t')[7]== 'BaseSubstitution' or snpset[i].split('\t')[7]== 'SmallCollapse':
                         cutinfo[2]=snpset[i].split('\t')[4]
                 else:
-                        print 'why'
+                        print 'Warning: Possible error in small-error correction.'
 
                 cutposinfo+=[cutinfo]
         #cutposinfo+=[[get_snpcut_start(snpset[-1]),-1,'']]
@@ -77,7 +76,7 @@ def call_flye(datatype,outpath,aeinfo):
 
 
 def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
-	snpsetshift=[c for c in snpset if 'Indel' in c]
+	snpsetshift=[c for c in snpset if 'Small' in c]
 	snpsetshift.sort(key=sort_snp)
 	new=[]
 	bam=pysam.AlignmentFile(bamfile,'rb')
@@ -147,7 +146,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
 		shiftpos=0
 		for d in snpsetshift:
 			if int(d.split('\t')[2])<=aestart:
-				if 'Indel-ins' in d:
+				if 'SmallCollapse' in d:
 					shiftpos+=len(d.split('\t')[4])
 				else:
 					shiftpos-=len(d.split('\t')[3])

@@ -63,7 +63,7 @@ export PATH=$PWD/Inspector/:$PATH
 ```
 
 
-To simplify the environment setup process, Anaconda (https://www.anaconda.com/) is recommended.
+To simplify the environment setup process, Anaconda2 (https://www.anaconda.com/) is recommended.
 To create an environment with conda:
 ```
 conda create --name ins python=2.7
@@ -76,6 +76,14 @@ conda install -c bioconda flye=2.8.2
 
 inspector.py -h
 ```
+
+A test dataset is available to verify successful installation:
+```
+./inspector.py -c testdata/contig_test.fa -r testdata/read_test.fastq -o test_out/ --datatype hifi 
+./inspector-correct.py -i test_out/ --datatype pacbio-hifi 
+```
+(The Inspector evaluation on test dataset should finish within several minutes with 4 CPUs and 400MB memory.
+The Inspector error correction should finish within 10-15 minutes with 4 CPUs and 500MB memory.)
 
 
 ## General usage
@@ -105,10 +113,10 @@ inspector.py [-h] -c contig.fa -r raw_reads.fa -o output_dict/
 
 
 
-inspector-correct.py [-h] -i inspector_out/ --data pacbio-raw 
+inspector-correct.py [-h] -i inspector_out/ --datatype pacbio-raw 
   required arguments:
   --inspector,-i        Inspector evaluation directory with original file names
-  --data                Type of read used for Inspector evaluation. Required for structural error correction
+  --datatype            Type of read used for Inspector evaluation. Required for structural error correction
   --outpath,-o          Output directory
   --thread,-t           Number of threads
   --skip_structural     Do not correct structural errors. Local assembly will not be performed
@@ -142,7 +150,7 @@ For the '--skip' options, do not use unless you are repeating the evaluation wit
 Inspector provides an error-correction module to improve assembly accuracy. High-accuracy reads are recommended, especially for small-scale error correction:
 (Note that only reads from single platform are supported for error correction.)
 ```
-inspector-correct.py -i inspector_out/ --datatype hifi -o inspector_out/ 
+inspector-correct.py -i inspector_out/ --datatype pacbio-hifi -o inspector_out/ 
 ```
 
 
