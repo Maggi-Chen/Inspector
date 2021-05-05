@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 import argparse
 import multiprocessing
 import sys
@@ -8,10 +8,10 @@ import time
 
 
 t0=time.time()
-parser=argparse.ArgumentParser(description='Assembly error correction based on Inspector assembly evaluation', usage='inspector-correct.py [-h] -i inspector_out/ --data pacbio-raw ')
+parser=argparse.ArgumentParser(description='Assembly error correction based on Inspector assembly evaluation', usage='inspector-correct.py [-h] -i inspector_out/ --datatype pacbio-raw ')
 parser.add_argument('-v','--version', action='version', version='Inspector_correct_v1.0')
 parser.add_argument('-i','--inspector',type=str,default=False,help='Inspector evaluation directory. Original file names are required.',required=True)
-parser.add_argument('--data',type=str,default=False,help='Type of read used for Inspector evaluation. This option is required for structural error correction when performing local assembly with Flye. (pacbio-raw, pacbio-hifi, nano-raw,pacbio-corr, nano-corr)',required=True)
+parser.add_argument('--datatype',type=str,default=False,help='Type of read used for Inspector evaluation. This option is required for structural error correction when performing local assembly with Flye. (pacbio-raw, pacbio-hifi, nano-raw,pacbio-corr, nano-corr)',required=True)
 parser.add_argument('-o','--outpath',type=str,default=False,help='output directory')
 parser.add_argument('--skip_structural',action='store_true',default=False,help='Do not correct structural errors. Local assembly will not be performed.')
 parser.add_argument('--skip_baseerror',action='store_true',default=False,help='Do not correct base errors.')
@@ -22,12 +22,12 @@ if len(sys.argv)==1:
 	sys.exit(1)
 inscor_args=parser.parse_args()
 
-if not inscor_args.skip_structural and not inscor_args.data:
-	print 'Error:  No data type (--data) given!\nFor Debreak usage, use -h or --help'
+if not inscor_args.skip_structural and not inscor_args.datatype:
+	print 'Error:  No data type (--datatype) given!\nFor Debreak usage, use -h or --help'
 	sys.exit(1)
 
-if inscor_args.data not in ['pacbio-raw','pacbio-hifi', 'pacbio-corr', 'nano-raw',' nano-corr']:
-	print 'Error:  Data type (--data) not valid. Supported read types are: pacbio-raw, pacbio-hifi, pacbio-corr, nano-raw, nano-corr.'
+if inscor_args.datatype not in ['pacbio-raw','pacbio-hifi', 'pacbio-corr', 'nano-raw',' nano-corr']:
+	print 'Error:  Data type (--datatype) not valid. Supported read types are: pacbio-raw, pacbio-hifi, pacbio-corr, nano-raw, nano-corr.'
 	sys.exit(1)
 
 
@@ -43,8 +43,8 @@ else:
 		outpath=inscor_args.outpath+'/'
 	else:
 		outpath=inscor_args.outpath
-if not os.path.exists(inscor_args.outpath):
-	os.mkdir(inscor_args.outpath)
+if not os.path.exists(outpath):
+	os.mkdir(outpath)
 
 t1=time.time()
 print 'TIME for validating parameter',t1-t0
@@ -101,7 +101,7 @@ t3=time.time()
 print 'TIME for reading assembly errors',t3-t2
 
 for chrominfo in ctginfo:
-	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.data,inscor_args.thread/3)
+	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.datatype,inscor_args.thread/3)
 
 t4=time.time()
 print 'TIME for correcting all contigs',t4-t3
@@ -170,7 +170,7 @@ if not inscor_args.skip_structural:
 		snpset=[c for c in newsnplist if c.split('\t')[0]==ctg]
 		aeset=[c for c in aelist if c.split('\t')[0]==ctg]
 		if aeset!=[]:
-			aeset=inspector_correct.findpos(aeset,snpset,bamfile,outpath,inscor_args.data)
+			aeset=inspector_correct.findpos(aeset,snpset,bamfile,outpath,inscor_args.datatype)
 		if aeset!=[]:
 			(newseq,newcorrected)=inspector_correct.ae_correction(ctginfo[ctg],aeset,outpath)
 			ctginfo[ctg]=newseq
