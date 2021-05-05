@@ -52,7 +52,7 @@ def getsnv(path,chrom,mincount,maxcov):
                         if ins>=min_supp :
                                 mostf1=find2(insseq)
 				numbaseerror+=1
-                                g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+a.split('\t')[1]+'\t-\t'+mostf1+'\t'+str(ins)+'\t'+str(depth)+'\tIndel-ins\n')
+                                g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+a.split('\t')[1]+'\t-\t'+mostf1+'\t'+str(ins)+'\t'+str(depth)+'\tSmallCollapse\n')
 
                         #print info;aaa=input()
 		if dels>=min_supp:
@@ -73,7 +73,7 @@ def getsnv(path,chrom,mincount,maxcov):
                         if dels>=min_supp:
                                 mostf1=find2(insseq)
 				numbaseerror+=1
-                                g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+str(int(a.split('\t')[1])+len(mostf1)-1)+'\t'+mostf1+'\t-\t'+str(dels)+'\t'+str(depth)+'\tIndel-del\n')
+                                g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+str(int(a.split('\t')[1])+len(mostf1)-1)+'\t'+mostf1+'\t-\t'+str(dels)+'\t'+str(depth)+'\tSmallExpansion\n')
 
 
                 if info.count('.')+info.count('*')>0.8*int(a.split('\t')[3]) :
@@ -128,7 +128,7 @@ def getsnv(path,chrom,mincount,maxcov):
                         if max(acount,tcount,ccount,gcount)==gcount:
                                 altbase='G'
 			numbaseerror+=1
-                        g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+a.split('\t')[1]+'\t'+a.split('\t')[2]+'\t'+altbase+'\t'+str(max(acount,tcount,ccount,gcount))+'\t'+str(depth)+'\tSNP\n')
+                        g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+a.split('\t')[1]+'\t'+a.split('\t')[2]+'\t'+altbase+'\t'+str(max(acount,tcount,ccount,gcount))+'\t'+str(depth)+'\tBaseSubstitution\n')
 
                 a=f.readline()
         f.close()
@@ -160,9 +160,6 @@ def count_baseerrror(path,ctgtotallen,datatype):
 	allpvalue=[]
 
 	for c in allsnv:
-		#if ('SNP' in c and int(c.split('\t')[5])>=snvratio*int(c.split('\t')[6])) or ('SNP' not in c and int(c.split('\t')[5])>=ratio*int(c.split('\t')[6])):
-		
-		#p=statsmodels.stats.proportion.binom_test(int(c.split('\t')[5]), int(c.split('\t')[6]), prop=propvalue, alternative='larger')
 		p=0
 		nread=int(c.split('\t')[5])
 		depth=int(c.split('\t')[6])
@@ -171,17 +168,15 @@ def count_baseerrror(path,ctgtotallen,datatype):
 		for i in range(nread,depth+1):
 			p+=statsmodels.stats.proportion.binom_test(i, depth, prop=propvalue, alternative='larger')
 
-		#baseerror+=[c+'\t'+str(p)]
-		#allpvalue+=[p]
 		
 		if p<pcutoff :
                         iii+=1
 			baseerror+=[c+'\t'+str(p)]
-			if 'SNP' in c:
+			if 'BaseSubstitution' in c:
 				snv+=1
-			if 'Indel-del' in c:
+			if 'SmallExpansion' in c:
 				indeldel+=1
-			if 'Indel-ins' in c:
+			if 'SmallCollapse' in c:
 				indelins+=1
 		
         per=float(iii)/ctgtotallen*1000000
