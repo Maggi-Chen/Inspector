@@ -73,6 +73,12 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 	f.write('Total length\t'+str(sum(length))+'\n')
 	f.write('Total length of contigs > '+str(min_size)+' bp\t'+str(totallength)+'\n')
 	f.write('Total length of contigs >'+str(min_size_assemblyerror)+'bp\t'+str(sum(length_ae))+'\n')
+
+	if len(length)==0:
+		print 'Warning: No contigs found. Check if input file is empty.'
+		f.close()
+		quit()
+
 	f.write('Longest contig\t'+str(length[0])+'\n')
 	if len(length)>1:
 		f.write('Second longest contig length\t'+str(length[1])+'\n')

@@ -27,9 +27,8 @@ parser.add_argument('--min_contig_length_assemblyerror',type=int,default=1000000
 parser.add_argument('--min_assembly_error_size',type=int,default=50,help='minimal size for assembly errors. [50]')
 parser.add_argument('--max_assembly_error_size',type=int,default=4000000,help='maximal size for assembly errors. [4000000]')
 parser.add_argument('--pvalue',type=float,default=False,help='p-value cut off for small-scale error identification. [0.01 for HiFi, 0.05 for others]')
+parser.add_argument('--noplot',action='store_true',default=False,help='do not make plots')
 parser.add_argument('--skip_read_mapping',action='store_true',default=False,help='skip the step of mapping reads to contig.')
-
-
 parser.add_argument('--skip_structural_error',action='store_true',default=False,help='skip the step of identifying large structural errors.')
 parser.add_argument('--skip_structural_error_detect',action='store_true',default=False,help='skip the step of detecting large structural errors.')
 parser.add_argument('--skip_base_error',action='store_true',default=False,help='skip the step of identifying small-scale errors.')
@@ -209,4 +208,22 @@ if denovo_args.ref:
 
 t7=time.time()
 print 'TIME: Reference-based mode: ',t7-t6
+
+
+if not  denovo_args.noplot:
+	try:
+		import denovo_plot
+		denovo_plot.plot_n100(denovo_args.outpath,denovo_args.min_contig_length)
+	except:
+		print 'Warning: Failed to plot N1_N100.'
+	if denovo_args.ref:
+		try:
+			import denovo_plot
+			denovo_plot.plot_na100(denovo_args.outpath)
+			denovo_plot.plot_dotplot(denovo_args.outpath)
+		except:
+			print 'Warning: Failed to plot NA1_NA100 and Dotplots.'
+t8=time.time()
+print 'TIME: Generate plots: ',t8-t7
+print 'Inspector evaluation finished. Bye.'
 
