@@ -72,7 +72,7 @@ conda install -c bioconda minimap2=2.15
 conda install -c bioconda samtools=1.9
 conda install -c bioconda pysam=0.16.0.1
 conda install -c anaconda statsmodels=0.10.1
-conda install -c bioconda flye=2.8.2
+conda install -c bioconda flye=2.8.3
 
 inspector.py -h
 ```
