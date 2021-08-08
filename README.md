@@ -49,7 +49,7 @@ python 2.7
 
 
 Dependencies for Inspector error correction module:
-* flye  (tested with version 2.8.2)
+* flye  (tested with version 2.8.3)
 
 
 ## Installation
