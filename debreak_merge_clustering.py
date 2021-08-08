@@ -414,6 +414,7 @@ def filterae(depth,outpath,min_size,datatype):
                         new+=[c]; continue
 		
         f=open(outpath+'structural_error.bed','w')
+	f.write('#Contig_Name\tStart_Position\tEnd_Position\t$Supporting_Read\tType\tSize\tHaplotype_Info\tDepth_Left\tDepth_Right\tDepth_Min\tSupporting_Read_Name\tHaplotype_Switch_Info\n')
         for c in new:
                 f.write(c+'\n')
         f.close()
