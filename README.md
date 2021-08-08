@@ -161,22 +161,22 @@ Inspector writes its evaluation reports into a new directory to avoid conflicts 
 An evaluation report the the input assembly. This file includes the contig continuity statistics reports, the read mapping sumamry, number of structural and small-scale errors, the QV score, and the contig alignment summary from reference-based mode when available. An assembly with expected total length, high read-to-contig mapping rate, low number of structural and small-scale errors, and high QV score indicates a high assembly quality. When the reference genome is provided, a higher genome coverage and NA50 also indicates more complete assembly.
 
 ### structural_error.bed
-This file includes all structural errors indetified in the assembly.
-The first, second and third column indicate the contig, start and end position of structural error. For Expansions and Inversions, the size of error equals the distance between start and end position. For Collapses, the collapsed sequences are missing in the contigs, therefore the EndPosition is StartPosition+1. The length of collapsed sequence should be inferred from the Size column. For HaplotypeSwitches, Inspector normally considers the haplotype containing Expansion-like pattern as haplotype 1, and considers the haplotype with Collapse-like pattern as haplotype 2. The position of error in haplotype1 and haplotype2 are seperated by ";" in the second and third columns.
-The forth column indicates the number of error-supporting reads. A high number of error-supporting reads indicates a confident error call. 
-The fifth and sixth column indicates the type and size of the erorr. For HaplotypeSwitch, the size of two haplotypes are usually different. Inspector normally lists the size in haplotype1 and haplotype2, corresponding to the position columns.
+This file includes all structural errors indetified in the assembly. <br />
+The first, second and third column indicate the contig, start and end position of structural error. For Expansions and Inversions, the size of error equals the distance between start and end position. For Collapses, the collapsed sequences are missing in the contigs, therefore the EndPosition is StartPosition+1. The length of collapsed sequence should be inferred from the Size column. For HaplotypeSwitches, Inspector normally considers the haplotype containing Expansion-like pattern as haplotype 1, and considers the haplotype with Collapse-like pattern as haplotype 2. The position of error in haplotype1 and haplotype2 are seperated by ";" in the second and third columns. <br />
+The forth column indicates the number of error-supporting reads. A high number of error-supporting reads indicates a confident error call. <br />
+The fifth and sixth column indicates the type and size of the erorr. For HaplotypeSwitch, the size of two haplotypes are usually different. Inspector normally lists the size in haplotype1 and haplotype2, corresponding to the position columns. <br />
 Column seven to twelve include other information about the structural errors. These are kept for developmental purpose. 
 
 ### small_scale_error.bed
-This file includes all small-scale errors identified in the assembly. 
-The firstm second and third column indicate the contig, start and end position of small-scale errors. Similar to the structural errors, the distance between StartPosition and EndPosition equals error size for small expansions and equals 1 for small collapses.
-The forth and fifth column indicate the base in the contig and in the reads. 
-The sixth and seventh column indicate the number of error-supporting reads and the local sequencing depth. A high supporting reads to depth ratio means a confident error call.
-The eighth column indicates the type of error.
+This file includes all small-scale errors identified in the assembly. <br />
+The firstm second and third column indicate the contig, start and end position of small-scale errors. Similar to the structural errors, the distance between StartPosition and EndPosition equals error size for small expansions and equals 1 for small collapses. <br />
+The forth and fifth column indicate the base in the contig and in the reads. <br />
+The sixth and seventh column indicate the number of error-supporting reads and the local sequencing depth. A high supporting reads to depth ratio means a confident error call. <br />
+The eighth column indicates the type of error. <br />
 The nineth column indicates the p-value from binominal test. 
 
 ### contig_corrected.fa 
-The output corrected assembly of Inspector error-correction module.
+The output corrected assembly of Inspector error-correction module. <br />
 Only contigs contained in the valid_contig.fa file (longer than --min_contig_length) are corrected. The small-scale errors listed in small_scale_error.bed should all be fixed. The structural errors in structural_error.bed are fixed if the local de novo assembly generates a full-length contig that can be confidently aligned to the original error region. Otherwise the original sequence will be remained. 
 
 
