@@ -151,7 +151,7 @@ def getsnv(path,chrom,mincount,maxcov,mindepth):
         return 0
 
 
-def count_baseerrror(path,ctgtotallen,datatype):
+def count_baseerrror(path,ctgtotallen,datatype,ave_depth):
 	os.system('cat '+path+'base_error_workspace/baseerror_*bed > '+path+'base_error_workspace/allbaseerror.bed')
 	allsnv=open(path+'base_error_workspace/allbaseerror.bed','r').read().split('\n')[:-1]
 	snv=0;indelins=0;indeldel=0
@@ -162,11 +162,16 @@ def count_baseerrror(path,ctgtotallen,datatype):
 		propvalue=0.5
 		pcutoff=0.01
 		readcutoff=0.75
+		if ave_depth<25:
+			pcutoff=0.02
+		if ave_depth<15:
+			pcutoff=0.1
 	else:
 		propvalue=0.4
 		pcutoff=0.05
 		readcutoff=0.5
-
+		if ave_depth<25:
+			pcutoff=0.1
 
 
 	allpvalue=[]

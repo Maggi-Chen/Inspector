@@ -383,7 +383,7 @@ def filterae(depth,outpath,min_size,datatype):
                                                         new+=[c[0]+'\t'+dd[1]+'\t'+dd[2]+'\t'+str(goodcol)+'\tCollapse\tSize='+str(colsize-expsize)+'\t'+dd[7]+'\t'+dd[8]+'\t'+dd[9]+'\t'+dd[10]+'\t'+';'.join(colread)]
                                                 col.remove(d);break
                                         else:
-						new+=[c[0]+'\t'+c[1]+';'+d.split('\t')[1]+'\t'+c[2]+';'+d.split('\t')[2]+'\t'+str(totaln)+'\tHeterozygosisError\tSize='+str(int(c[2])-int(c[1]))+';'+d.split('\t')[5].split('=')[1]+'\t-/-\t'+c[8]+'\t'+c[9]+'\t'+c[10]+'\t'+';'.join(expread)+':'+';'.join(colread)+'\t'+str(goodexp)+';'+str(goodcol)]
+						new+=[c[0]+'\t'+c[1]+';'+d.split('\t')[1]+'\t'+c[2]+';'+d.split('\t')[2]+'\t'+str(totaln)+'\tHaplotypeSwitch\tSize='+str(int(c[2])-int(c[1]))+';'+d.split('\t')[5].split('=')[1]+'\t-/-\t'+c[8]+'\t'+c[9]+'\t'+c[10]+'\t'+';'.join(expread)+':'+';'.join(colread)+'\t'+str(goodexp)+';'+str(goodcol)]
 				if 0.33>int(c[3])/float(d.split('\t')[3]):
                                         dd=d.split('\t')
                                         new+=[c[0]+'\t'+dd[1]+'\t'+dd[2]+'\t'+str(goodcol)+'\tCollapse\tSize='+str(int(c[2])-int(c[1]))+';'+d.split('\t')[5].split('=')[1]+'\t-/-\t'+dd[8]+'\t'+dd[9]+'\t'+dd[10]+'\t'+';'.join(colread)]
@@ -414,7 +414,7 @@ def filterae(depth,outpath,min_size,datatype):
                         new+=[c]; continue
 		
         f=open(outpath+'structural_error.bed','w')
-	f.write('#Contig_Name\tStart_Position\tEnd_Position\t$Supporting_Read\tType\tSize\tHaplotype_Info\tDepth_Left\tDepth_Right\tDepth_Min\tSupporting_Read_Name\tHaplotype_Switch_Info\n')
+	f.write('#Contig_Name\tStart_Position\tEnd_Position\tSupporting_Read\tType\tSize\tHaplotype_Info\tDepth_Left\tDepth_Right\tDepth_Min\tSupporting_Read_Name\tHaplotype_Switch_Info\n')
         for c in new:
                 f.write(c+'\n')
         f.close()
@@ -422,11 +422,11 @@ def filterae(depth,outpath,min_size,datatype):
 
 	exp=len([mm for mm in new if 'Exp' in mm])
 	col=len([mm for mm in new if 'Col' in mm])
-	het=len([mm for mm in new if 'Hete' in mm])
+	het=len([mm for mm in new if 'Haplo' in mm])
 	inv=len([mm for mm in new if 'Inv' in mm])
 	f=open(outpath+'summary_statistics','a')
 	f.write('Structural error\t'+str(len(new))+'\nExpansion\t'+str(exp)+'\nCollapse\t'+str(col))
-	f.write('\nHeterozygosis error\t'+str(het)+'\nInversion\t'+str(inv)+'\n')
+	f.write('\nHaplotype switch\t'+str(het)+'\nInversion\t'+str(inv)+'\n')
 	f.close()
 
 	os.system('rm '+outpath+'assembly_errors.bed*')

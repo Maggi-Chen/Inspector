@@ -22,11 +22,12 @@ parser.add_argument('--ref',type=str,default=False,help='OPTIONAL reference geno
 
 #parser.add_argument('--depth_plot',action='store_true',help='plot depth at all contigs.')
 parser.add_argument('-t','--thread',type=int,default=8,help='number of threads. [8]')
+parser.add_argument('--min_depth',type=int,default=False,help='minimal read-alignment depth for a contig base to be considered in QV calculation. [20%% of average depth]')
 parser.add_argument('--min_contig_length',type=int,default=10000,help='minimal length for a contig to be evaluated. [10000]')
 parser.add_argument('--min_contig_length_assemblyerror',type=int,default=1000000,help='minimal contig length for assembly error detection. [1000000]')
 parser.add_argument('--min_assembly_error_size',type=int,default=50,help='minimal size for assembly errors. [50]')
 parser.add_argument('--max_assembly_error_size',type=int,default=4000000,help='maximal size for assembly errors. [4000000]')
-parser.add_argument('--pvalue',type=float,default=False,help='p-value cut off for small-scale error identification. [0.01 for HiFi, 0.05 for others]')
+#parser.add_argument('--pvalue',type=float,default=False,help='p-value cut off for small-scale error identification. [0.01 for HiFi, 0.05 for others]')
 parser.add_argument('--noplot',action='store_true',default=False,help='do not make plots')
 parser.add_argument('--skip_read_mapping',action='store_true',default=False,help='skip the step of mapping reads to contig.')
 parser.add_argument('--skip_structural_error',action='store_true',default=False,help='skip the step of identifying large structural errors.')
@@ -104,6 +105,7 @@ print 'TIME: Read Alignment: ',t2-t1
 # Structural assembly error detection
 
 
+
 if not denovo_args.skip_structural_error_detect:
 	os.system("mkdir "+denovo_args.outpath+"map_depth/")
 	if not denovo_args.skip_structural_error:
@@ -127,7 +129,7 @@ if not denovo_args.skip_structural_error_detect:
 
 
 cov=denovo_static.mapping_info_ctg(denovo_args.outpath,chromosomes_large,chromosomes_small,totalcontiglen,totalcontiglen_large)
-minsupp=round(cov/10.0)
+minsupp=max(1,round(cov/10.0))
 
 t3=time.time()
 print 'TIME: Structural error signal detection: ',t3-t2
@@ -156,7 +158,7 @@ if not denovo_args.skip_base_error:
 		debreak_det=multiprocessing.Pool(denovo_args.thread)
 		os.system('mkdir '+denovo_args.outpath+'base_error_workspace')
 		for chrom in chromosomes_map:
-			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,cov*2/5,cov*2))
+			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,cov*2/5,cov*2,denovo_args.min_depth))
 		#denovo_baseerror.getsnv(denovo_args.outpath,chrom,cov*2/5,cov*2)
 		debreak_det.close()
 		debreak_det.join()
@@ -168,11 +170,22 @@ print 'TIME: Small-scale error detection: ',t5-t4
 
 #QV
 if aelen_structuralerror+aelen_baseerror>0:
-	print aelen_baseerror, aelen_structuralerror,totalcontiglen
-	qv=-10 * math.log10(float(aelen_baseerror+aelen_structuralerror)/totalcontiglen)
+	#print aelen_baseerror, aelen_structuralerror,totalcontiglen
+	try:
+		allvalidnum=open(denovo_args.outpath+'base_error_workspace/validbase','r').read().split('\n')[:-1]
+		validctgbase=sum([int(validnum) for validnum in allvalidnum])
+	except:
+		validctgbase=totalcontiglen
+	qv=-10 * math.log10(float(aelen_baseerror+aelen_structuralerror)/validctgbase)
+
+	print 'DEBUG: total base',validctgbase
+	print 'DEBUG: structural base',aelen_structuralerror
+	print 'DEBUG: small base',aelen_baseerror
+
 	f=open(denovo_args.outpath+'summary_statistics','a')
 	f.write('\nQV\t'+str(qv)+'\n')
 	f.close()
+
 
 t6=time.time()
 print 'TIME: QV calculation: ',t6-t5

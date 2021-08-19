@@ -299,7 +299,7 @@ def segmentdeletion(segments,min_size,max_size,if_contig):  #input a list of seg
 				del_size=rightread[3]-leftread[4]+overlapmap
 				if min_size<=del_size<=max_size:
 					svcallset+=[chrom+'\t'+str(leftread[4]-max(0,overlapmap))+'\t'+str(del_size)+'\t'+'D-segment'+'\t'+primary[0]+'\t'+str(c[1])+'\t'+str((int(c[6])+int(primary[6]))/2)]
-		
+			'''
 			#duplication:
 			if not if_contig:
 				overlapmap=leftinfo[0]+leftinfo[1]-rightinfo[0]
@@ -313,6 +313,7 @@ def segmentdeletion(segments,min_size,max_size,if_contig):  #input a list of seg
 					dup_size=rightread[4]-leftread[3]-overlapmap
 					if min_size<=dup_size<=max_size:
 						svcallset+=[chrom+'\t'+str(leftread[3])+'\t'+str(dup_size)+'\t'+'I-segment'+'\t'+primary[0]+'\t'+str(c[1])+'\t'+str((int(c[6])+int(primary[6]))/2)]
+			'''
 		#inversion:
 		for c in samechr:
 			if c[3]>primary[3] and c[4]-primary[4]>-200:
