@@ -163,7 +163,7 @@ if not denovo_args.skip_base_error:
 		debreak_det.close()
 		debreak_det.join()
 
-	aelen_baseerror=denovo_baseerror.count_baseerrror(denovo_args.outpath,totalcontiglen,denovo_args.datatype)
+	aelen_baseerror=denovo_baseerror.count_baseerrror(denovo_args.outpath,totalcontiglen,denovo_args.datatype,cov)
 
 t5=time.time()
 print 'TIME: Small-scale error detection: ',t5-t4
