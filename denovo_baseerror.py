@@ -11,13 +11,23 @@ def find2(li):
                         val=c
         return val
 
-def getsnv(path,chrom,mincount,maxcov):
+def getsnv(path,chrom,mincount,maxcov,mindepth):
+	print chrom
         g=open(path+'base_error_workspace/baseerror_'+chrom+'.bed','w')
         os.system('samtools mpileup -Q 0 '+path+'read_to_contig.bam -r '+chrom+' -o '+path+'base_error_workspace/base_'+chrom+'.pileup -f '+path+'valid_contig.fa')
         f=open(path+'base_error_workspace/base_'+chrom+'.pileup','r')
         a=f.readline()
 	numbaseerror=0
+	validctgbase=0
+	if mindepth==False and type(mindepth)==bool:
+		mindepth=maxcov/10.0
+
+
+	print mindepth,maxcov
+
         while a!='':
+		if a.split('\t')[2]!='N' and mindepth<=int(a.split('\t')[3]) <=maxcov:
+			validctgbase+=1
                 if int(a.split('\t')[3]) <mincount or int(a.split('\t')[3])-a.split('\t')[4].count('*') > maxcov:
                         a=f.readline(); continue
 
@@ -54,7 +64,6 @@ def getsnv(path,chrom,mincount,maxcov):
 				numbaseerror+=1
                                 g.write(a.split('\t')[0]+'\t'+str(int(a.split('\t')[1])-1)+'\t'+a.split('\t')[1]+'\t-\t'+mostf1+'\t'+str(ins)+'\t'+str(depth)+'\tSmallCollapse\n')
 
-                        #print info;aaa=input()
 		if dels>=min_supp:
                         ifindel=True;
                         insinfp=info.split('-')[1:]
@@ -132,14 +141,17 @@ def getsnv(path,chrom,mincount,maxcov):
 
                 a=f.readline()
         f.close()
-        os.system('rm '+path+'base_error_workspace/base_'+chrom+'.pileup')
+#       os.system('rm '+path+'base_error_workspace/base_'+chrom+'.pileup')
         g.close()
 	if numbaseerror==0:
 		os.system('rm '+path+'base_error_workspace/baseerror_'+chrom+'.bed')
+	f=open(path+'base_error_workspace/validbase','a')
+	f.write(str(validctgbase)+'\n')
+	f.close()
         return 0
 
 
-def count_baseerrror(path,ctgtotallen,datatype):
+def count_baseerrror(path,ctgtotallen,datatype,ave_depth):
 	os.system('cat '+path+'base_error_workspace/baseerror_*bed > '+path+'base_error_workspace/allbaseerror.bed')
 	allsnv=open(path+'base_error_workspace/allbaseerror.bed','r').read().split('\n')[:-1]
 	snv=0;indelins=0;indeldel=0
@@ -150,11 +162,16 @@ def count_baseerrror(path,ctgtotallen,datatype):
 		propvalue=0.5
 		pcutoff=0.01
 		readcutoff=0.75
+		if ave_depth<25:
+			pcutoff=0.02
+		if ave_depth<15:
+			pcutoff=0.1
 	else:
 		propvalue=0.4
 		pcutoff=0.05
 		readcutoff=0.5
-
+		if ave_depth<25:
+			pcutoff=0.1
 
 
 	allpvalue=[]
@@ -181,6 +198,7 @@ def count_baseerrror(path,ctgtotallen,datatype):
 		
         per=float(iii)/ctgtotallen*1000000
 	f=open(path+'small_scale_error.bed','w')
+	f.write('#Contig_Name\tStart_Position\tEnd_Position\tBase_Contig\tBase_Read\tSupporting_Read\tDepth\tType\tPvalue\n')
 	for c in baseerror:
 		f.write(c+'\n')
 	f.close()
@@ -191,7 +209,4 @@ def count_baseerrror(path,ctgtotallen,datatype):
 	return iii	
 
 	
-
-
-
 
