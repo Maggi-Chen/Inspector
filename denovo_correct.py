@@ -85,7 +85,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
 	for c in aeset:
 		if 'Inversion' in c:
 			continue
-		if 'HeterozygosisError' in c:
+		if 'HaplotypeSwitch' in c:
 			if int(c.split('\t')[11].split(';')[0])>=int(c.split('\t')[11].split(';')[1]):
 				readgroup=c.split('\t')[10].split(':')[0].split(';')
 				aestart=int(c.split('\t')[1].split(';')[0])
@@ -162,8 +162,6 @@ def substitute_seq(ctgseq,newseq,ctgstart,ctgend,newstart,newend,diffsize):
 	oldpart=ctgseq[ctgstart-1000-10:ctgend+1000+10]
 	realdiff=len(newpart)-len(oldpart)
 	if (realdiff/float(diffsize)>2 or realdiff/float(diffsize)<0.5) and (abs(diffsize-realdiff)>300 and realdiff*diffsize>0):
-		print 'size is wrong'
-		print len(newpart),len(oldpart)
 		return (ctgseq,False)
 	leftside= check_same(newpart[:100],oldpart[10:110])
 	rightside= check_same(newpart[-100:],oldpart[-110:-10])
@@ -180,16 +178,10 @@ def substitute_seq(ctgseq,newseq,ctgstart,ctgend,newstart,newend,diffsize):
                         if rightside>=90:
                                 break
         if leftside>=90 and rightside>=90:
-                #print c,leftside,rightside
-		print shift1,shift2
                 ctgseq=ctgseq[:ctgstart-1000+shift1]+newpart+ctgseq[ctgend+1000+shift2:]
 		return (ctgseq,True)
 	else:
-		print 'not enough match',leftside,rightside
 		ctgseq=ctgseq[:ctgstart-1000]+newpart+ctgseq[ctgend+1000:]
-		#print ctgstart,newstart
-		#print newpart[:100]
-		#print oldpart[10:110]
 		return (ctgseq,True)
 
 def ae_correct_within(seq,read,start,end,size):
@@ -205,7 +197,6 @@ def ae_correct_within(seq,read,start,end,size):
 		(seq,ifcorr)=substitute_seq(seq,read.query_sequence,start,end,readstart,readend,size)
 		return (seq,ifcorr)
 	else:
-		print 'cannot find position?'
 		return (seq,False)
 
 
@@ -241,13 +232,10 @@ def ae_correct_expcol(seq,align,aetype):
 
 	for read in align:
 		if read.reference_start < start-1000 and end+1000<read.reference_end:
-			print 'within one read'
 			(seq,ifcorr)=ae_correct_within(seq,read,start,end,size)
 			return (seq,ifcorr)
 	if len(align)<2:
-		print 'not found'
 		return (seq,False)
-	print 'between alignments'
 	(seq,ifcorr)=ae_correct_between(seq,align,start,end,size)
 	return (seq,ifcorr)
 
@@ -325,7 +313,9 @@ def ae_correction(ctgseq,aeset,outpath):
 			(ctgseq,ifcorr)=ae_correct_expcol(ctgseq,samectg,'col')
 			if ifcorr:
 				numcorr+=1
-	print 'total ae',len(aeset),' corrected error',numcorr
+	logf=open(outpath+'Inspector_correct.log','a')
+	logf.write('total ae'+str(len(aeset))+', corrected error '+str(numcorr)+'\n')
+	logf.close()
 	return (ctgseq,numcorr)
 
 	mapinfo={}
@@ -345,7 +335,7 @@ def ae_correction(ctgseq,aeset,outpath):
 		aeend=int(c.split('\t')[2])
 		aligninfo=mapinfo[aeinfo]
 		if type(aligninfo)==int:
-			print 'Inspector ',c,'No Align!';continue
+			continue
 		cigar=aligninfo.cigarstring
 		refpos=aligninfo.reference_start
 		readpos=0
@@ -370,7 +360,6 @@ def ae_correction(ctgseq,aeset,outpath):
 				readpos+=int(num);num='';continue
 			if m=='H':
 				num='';continue
-			print 'Inspector badcigar' ,m;quit()
 		newseq=aligninfo.query_sequence[readstart:readend]
 		oldseq=ctgseq[aestart-1000-10:aeend+1000+10]
 		leftside= check_same(newseq[:100],oldseq[10:110])
@@ -388,22 +377,14 @@ def ae_correction(ctgseq,aeset,outpath):
 				if rightside>=90:
 					break
 		if leftside>=90 and rightside>=90:
-			#print c,leftside,rightside
 			ctgseq=ctgseq[:aestart-1000+shift1]+newseq+ctgseq[aeend+1000+shift2:]
 			correctedstructural+=1
-		#print newseq[:100],oldseq[:100]
-		#print newseq[-100:],oldseq[-100:]
-		#print readstart,readend
-		#print aestart-1000-aligninfo.reference_start,aeend+1000-aligninfo.reference_start
-		#aaaaaaa=input()
 	return (ctgseq,correctedstructural)
 
 
 
 def error_correction_large(ctg,oldseq,aeset,snpset,bamfile,outpath,datatype,thread):
 	t0=time.time()
-	#aeset=[c for c in aeset if c.split('\t')[0]==ctg]
-	#snpset=[c for c in snpset if c.split('\t')[0]==ctg]
 	(newseq,snpset)=base_correction(oldseq,snpset,ctg)
 	if aeset!=[]:
 		aeset=findpos(aeset,snpset,bamfile,outpath,datatype,thread)
@@ -413,7 +394,9 @@ def error_correction_large(ctg,oldseq,aeset,snpset,bamfile,outpath,datatype,thre
 	ff.write('>'+ctg+'\n'+newseq+'\n')
 	ff.close()
 	t1=time.time()
-	print 'TIME used for large ',ctg,t1-t0
+	logf=open(outpath+'Inspector_correct.log','a')
+	logf.write('TIME used for structural error correction of '+ctg+': '+str(t1-t0)+'\n')
+	logf.close()
 	return 0
 
 def error_correction_small(ctg,oldseq,snpset,bamfile,outpath,datatype):
@@ -424,76 +407,10 @@ def error_correction_small(ctg,oldseq,snpset,bamfile,outpath,datatype):
 	ff.write('>'+ctg+'\n'+newseq+'\n')
 	ff.close()
 	t1=time.time()
-	print 'TIME used for small ',ctg,t1-t0
+	logf=open(outpath+'Inspector_correct.log','a')
+	logf.write('TIME used for small error correction of '+ctg+':'+str(t1-t0)+'\n')
+	logf.close()
 	return 0
-
-
-
-if __name__ =="__main__":
-
-	t=sys.argv[1]
-	ty=sys.argv[2]
-
-	outpath='/data/scratch/maggic/Inspector_results/hg002_error_correction_nano_corr/'+t+'_'+ty+'/'	
-	os.system('mkdir '+outpath)
-	os.system('mkdir '+outpath+'assemble_workspace/')
-	print outpath
-	readpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome_testruntime/'
-	allctg=open(readpath+t+'_'+ty+'/valid_contig.fa','r').read().split('>')[1:]
-	ctginfo={}
-	for c in allctg:
-		ctginfo[c.split('\n')[0]]=c.split('\n')[1]
-	allaelist=open(readpath+t+'_'+ty+'/assembly_errors.bed-gt_filtered_newtest','r').read().split('\n')[:-1]
-	try:
-		allsnplist=open(readpath+t+'_'+ty+'/small_scale_error_p0.01.bed','r').read().split('\n')[:-1]
-	except:
-		allsnplist=open(readpath+t+'_'+ty+'/test_baseerror_qvalue_'+t+'_'+ty,'r').read().split('\n')[:-1]
-		allsnplist=[cc for cc in allsnplist if float(cc.split('\t')[8])<0.01]
-
-	#snplist=[c for c in snplist if int(c.split('\t')[5])>=0.7*int(c.split('\t')[6])]
-	ctglen=open(readpath+t+'_'+ty+'/contig_length_info','r').read().split('\n')[:-1]
-	bamfile=readpath+t+'_'+ty+'/read_to_contig.bam'
-
-	thread=3
-	
-	smallctgs=[c for c in ctglen if 10000<=int(c.split('\t')[1])<1000000]
-	largectgs=[c for c in ctglen if 1000000<=int(c.split('\t')[1])]
-	snpctg={}
-	aectg={}
-	for c in ctglen:
-		snpctg[c.split('\t')[0]]=[]
-		aectg[c.split('\t')[0]]=[]
-	for c in allaelist:
-		aectg[c.split('\t')[0]]+=[c]
-	for c in allsnplist:
-		snpctg[c.split('\t')[0]]+=[c]
-
-
-	datatype='nano-raw'
-
-	
-	for chrominfo in largectgs:
-		error_correction_large(chrominfo.split('\t')[0],ctginfo[chrominfo.split('\t')[0]],aectg[chrominfo.split('\t')[0]],snpctg[chrominfo.split('\t')[0]],bamfile,outpath,datatype)	
-	
-	debreak_det=multiprocessing.Pool(thread)
-	for chrominfo in smallctgs:
-		debreak_det.apply_async(error_correction_small,args=(chrominfo.split('\t')[0],ctginfo[chrominfo.split('\t')[0]],snpctg[chrominfo.split('\t')[0]],bamfile,outpath,datatype))
-	debreak_det.close()
-	debreak_det.join()
-	allctgs=[c.split('\t')[0] for c in ctglen if 10000<=int(c.split('\t')[1])]
-	f=open(outpath+'contig_corrected.fa','w')
-	for ctg in allctgs:
-		try:
-			ctgseq=open(outpath+'contig_corrected_'+ctg+'.fa','r').read().split('\n')[1]
-			f.write('>'+ctg+'\n'+ctgseq+'\n')
-		except:
-			print 'Warning: corrected contig ',ctg,'not found.'
-			pass
-	f.close()
-	os.system('rm '+outpath+'contig_corrected_*fa')	
-	print 'All Done'
-
-
 
 
 

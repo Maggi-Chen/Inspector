@@ -5,11 +5,10 @@ import denovo_static
 import debreak_detect
 import debreak_merge_clustering as debreak_cluster
 import debreak_merge
-#import denovo_baseerror
 import multiprocessing
 import math 
 import time
-
+from datetime import datetime
 t0=time.time()
 
 parser=argparse.ArgumentParser(description='de novo assembly evaluator', usage='inspector.py [-h] -c contig.fa -r raw_reads.fastq -o output_dict/')
@@ -20,14 +19,12 @@ parser.add_argument('-d','--datatype',type=str,default='clr',help='Input read ty
 parser.add_argument('-o','--outpath',type=str,default='./adenovo_evaluation-out/',help='output directory')
 parser.add_argument('--ref',type=str,default=False,help='OPTIONAL reference genome in FASTA format')
 
-#parser.add_argument('--depth_plot',action='store_true',help='plot depth at all contigs.')
 parser.add_argument('-t','--thread',type=int,default=8,help='number of threads. [8]')
 parser.add_argument('--min_depth',type=int,default=False,help='minimal read-alignment depth for a contig base to be considered in QV calculation. [20%% of average depth]')
 parser.add_argument('--min_contig_length',type=int,default=10000,help='minimal length for a contig to be evaluated. [10000]')
 parser.add_argument('--min_contig_length_assemblyerror',type=int,default=1000000,help='minimal contig length for assembly error detection. [1000000]')
 parser.add_argument('--min_assembly_error_size',type=int,default=50,help='minimal size for assembly errors. [50]')
 parser.add_argument('--max_assembly_error_size',type=int,default=4000000,help='maximal size for assembly errors. [4000000]')
-#parser.add_argument('--pvalue',type=float,default=False,help='p-value cut off for small-scale error identification. [0.01 for HiFi, 0.05 for others]')
 parser.add_argument('--noplot',action='store_true',default=False,help='do not make plots')
 parser.add_argument('--skip_read_mapping',action='store_true',default=False,help='skip the step of mapping reads to contig.')
 parser.add_argument('--skip_structural_error',action='store_true',default=False,help='skip the step of identifying large structural errors.')
@@ -37,41 +34,41 @@ parser.add_argument('--skip_base_error_detect',action='store_true',default=False
 
 denovo_args=parser.parse_args()
 
-#print denovo_args.contig
-print "Start Assembly evaluation with contigs: " + str(denovo_args.contigfile)
+if denovo_args.outpath[-1]!='/':
+	denovo_args.outpath+='/'
+if not os.path.exists(denovo_args.outpath):
+	os.mkdir(denovo_args.outpath)
+
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('Inspector starting... '+datetime.now().strftime("%d/%m/%Y %H:%M:%S")+'\n')
+logf.write("Start Assembly evaluation with contigs: " + str(denovo_args.contigfile)+'\n')
 validate_read=[]
 for inputfile in denovo_args.read:
 	try:
 		open(inputfile,'r')
 		validate_read+=[inputfile]
 	except:
-		print 'Warning: cannot open input file \"'+inputfile+'\". Removed from list.'
+		logf.write('Warning: cannot open input file \"'+inputfile+'\". Removed from list.'+'\n')
 if len(validate_read)==0:
-	print 'Error: No valida input read file. Abort.'
+	logf.write('Error: No valida input read file. Abort.\n')
 	quit()
 
 if denovo_args.datatype not in ['clr','hifi','nanopore']:
-	print 'Warning: Invalid input datatype (--datatype/-d). Should be one of the following: clr, ccs, nanopore. Use clr as default.'
+	logf.write('Warning: Invalid input datatype (--datatype/-d). Should be one of the following: clr, ccs, nanopore. Use clr as default.\n')
 	denovo_args.datatype='clr'
 
-# check input arguments
-if denovo_args.outpath[-1]!='/':
-	denovo_args.outpath+='/'
-
-if not os.path.exists(denovo_args.outpath):
-	os.mkdir(denovo_args.outpath)
-
+# Check input arguments
 if len(denovo_args.contigfile)==1:
 	singlecontig=True
 elif len(denovo_args.contigfile)==2:
 	singlecontig=False
 else:
-	print 'Error: Input contig file should be either 1 fasta file or two halploid.fa files. Check input -c/--contig.'
+	logf.write('Error: Input contig file should be either 1 fasta file or two halploid.fa files. Check input -c/--contig.\n')
 	quit()
 
 if not denovo_args.skip_base_error:
 	import denovo_baseerror
-
+logf.close()
 
 # Simple statistics of contigs	
 contiginfo=denovo_static.simple(denovo_args.contigfile,denovo_args.outpath,denovo_args.min_contig_length,denovo_args.min_contig_length_assemblyerror)
@@ -85,27 +82,30 @@ totalcontiglen_large=contiginfo[4]
 
 
 t1=time.time()
-print 'TIME: Before read mapping ',t1-t0
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Before read mapping '+str(t1-t0)+'\n')
+logf.close()
 
+
+# Read alignment
 if not denovo_args.skip_read_mapping:
 	inputfileid=1
 	for inputfile in validate_read:
-		print "minimap2 -a -Q -N 1 -I 10G -t " + str(denovo_args.thread) + "  "+denovo_args.outpath+"valid_contig.fa " + inputfile + " | samtools sort -@ " + str(denovo_args.thread) + " -o  "+denovo_args.outpath+"read_to_contig_"+str(inputfileid)+".bam"
 		os.system("minimap2 -a -Q  -N 1 -I 10G -t " + str(denovo_args.thread) + "  "+denovo_args.outpath+"valid_contig.fa " + inputfile + " | samtools sort -@ " + str(denovo_args.thread) + " -o  "+denovo_args.outpath+"read_to_contig_"+str(inputfileid)+".bam")
 		inputfileid+=1
 	if len(validate_read)>1:
 		os.system("samtools merge  "+denovo_args.outpath+"read_to_contig.bam  "+denovo_args.outpath+"read_to_contig_*.bam")
+		os.system("rm "+str(denovo_args.outpath)+"read_to_contig_*.bam")
 	else:
 		os.system("mv "+denovo_args.outpath+"read_to_contig_1.bam "+denovo_args.outpath+"read_to_contig.bam")
 	os.system("samtools index "+str(denovo_args.outpath)+"read_to_contig.bam")
-	os.system("rm "+str(denovo_args.outpath)+"read_to_contig_*.bam")
-
 t2=time.time()
-print 'TIME: Read Alignment: ',t2-t1
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Read Alignment: '+str(t2-t1)+'\n')
+logf.close()
+
+
 # Structural assembly error detection
-
-
-
 if not denovo_args.skip_structural_error_detect:
 	os.system("mkdir "+denovo_args.outpath+"map_depth/")
 	if not denovo_args.skip_structural_error:
@@ -132,7 +132,10 @@ cov=denovo_static.mapping_info_ctg(denovo_args.outpath,chromosomes_large,chromos
 minsupp=max(1,round(cov/10.0))
 
 t3=time.time()
-print 'TIME: Structural error signal detection: ',t3-t2
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Structural error signal detection: '+str(t3-t2)+'\n')
+logf.close()
+
 
 aelen_structuralerror=0
 if not denovo_args.skip_structural_error:
@@ -148,7 +151,9 @@ if not denovo_args.skip_structural_error:
 	aelen_structuralerror=debreak_cluster.filterae(cov,denovo_args.outpath,denovo_args.min_assembly_error_size,denovo_args.datatype)
 
 t4=time.time()
-print 'TIME: Structural error clustering : ',t4-t3
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Structural error clustering : '+str(t4-t3)+'\n')
+logf.close()
 
 # SNP & indel detection
 aelen_baseerror=0
@@ -159,18 +164,18 @@ if not denovo_args.skip_base_error:
 		os.system('mkdir '+denovo_args.outpath+'base_error_workspace')
 		for chrom in chromosomes_map:
 			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,cov*2/5,cov*2,denovo_args.min_depth))
-		#denovo_baseerror.getsnv(denovo_args.outpath,chrom,cov*2/5,cov*2)
 		debreak_det.close()
 		debreak_det.join()
 
 	aelen_baseerror=denovo_baseerror.count_baseerrror(denovo_args.outpath,totalcontiglen,denovo_args.datatype,cov)
 
 t5=time.time()
-print 'TIME: Small-scale error detection: ',t5-t4
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Small-scale error detection: '+str(t5-t4)+'\n')
+logf.close()
 
 #QV
 if aelen_structuralerror+aelen_baseerror>0:
-	#print aelen_baseerror, aelen_structuralerror,totalcontiglen
 	try:
 		allvalidnum=open(denovo_args.outpath+'base_error_workspace/validbase','r').read().split('\n')[:-1]
 		validctgbase=sum([int(validnum) for validnum in allvalidnum])
@@ -178,23 +183,19 @@ if aelen_structuralerror+aelen_baseerror>0:
 		validctgbase=totalcontiglen
 	qv=-10 * math.log10(float(aelen_baseerror+aelen_structuralerror)/validctgbase)
 
-	print 'DEBUG: total base',validctgbase
-	print 'DEBUG: structural base',aelen_structuralerror
-	print 'DEBUG: small base',aelen_baseerror
-
 	f=open(denovo_args.outpath+'summary_statistics','a')
 	f.write('\nQV\t'+str(qv)+'\n')
 	f.close()
 
 
 t6=time.time()
-print 'TIME: QV calculation: ',t6-t5
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: QV calculation: '+str(t6-t5)+'\n')
+logf.close()
 
-# if reference is also provided:
+# Reference-based evaluation
 if denovo_args.ref:
 	mapinfo=os.system("minimap2 -a -I 10G --eqx -x asm5 -t " + str(denovo_args.thread/2) + " "+denovo_args.ref+" " + denovo_args.outpath + "valid_contig.fa  --secondary=no > "+ denovo_args.outpath+"contig_to_ref.sam")
-	#print 'os.system return value: '+str(mapinfo)
-	#quit()
 	os.system("samtools sort -@ " + str(denovo_args.thread/2) + " "+ denovo_args.outpath+"contig_to_ref.sam -o  " + denovo_args.outpath+"contig_to_ref.bam")
 	os.system("samtools index "+ denovo_args.outpath+"contig_to_ref.bam")
 	chromosomes=denovo_static.get_ref_align_info(denovo_args.outpath,totalcontiglen)
@@ -220,23 +221,32 @@ if denovo_args.ref:
 	denovo_static.basepair_error_ref(denovo_args.outpath,contiginfo[5])
 
 t7=time.time()
-print 'TIME: Reference-based mode: ',t7-t6
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Reference-based mode: '+str(t7-t6)+'\n')
+logf.close()
 
-
-if not  denovo_args.noplot:
+# Plots
+if not denovo_args.noplot:
 	try:
 		import denovo_plot
 		denovo_plot.plot_n100(denovo_args.outpath,denovo_args.min_contig_length)
 	except:
-		print 'Warning: Failed to plot N1_N100.'
+		logf=open(denovo_args.outpath+'Inspector.log','a')
+		logf.write('Warning: Failed to plot N1_N100.\n')
+		logf.close()
 	if denovo_args.ref:
 		try:
 			import denovo_plot
 			denovo_plot.plot_na100(denovo_args.outpath)
 			denovo_plot.plot_dotplot(denovo_args.outpath)
 		except:
-			print 'Warning: Failed to plot NA1_NA100 and Dotplots.'
+			logf=open(denovo_args.outpath+'Inspector.log','a')
+			logf.write('Warning: Failed to plot NA1_NA100 and Dotplots.\n')
+			logf.close()
 t8=time.time()
-print 'TIME: Generate plots: ',t8-t7
-print 'Inspector evaluation finished. Bye.'
+logf=open(denovo_args.outpath+'Inspector.log','a')
+logf.write('TIME: Generate plots: '+str(t8-t7)+'\n')
+logf.write('Inspector evaluation finished. Bye.\n')
+logf.close()
+
 

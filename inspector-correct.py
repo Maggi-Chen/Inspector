@@ -4,6 +4,7 @@ import multiprocessing
 import sys
 import denovo_correct as inspector_correct
 import os
+from datetime import datetime
 import time 
 
 
@@ -20,22 +21,12 @@ parser.add_argument('-t','--thread',type=int,default=8,help='number of threads')
 if len(sys.argv)==1:
 	parser.print_help()
 	sys.exit(1)
+
 inscor_args=parser.parse_args()
-
-if not inscor_args.skip_structural and not inscor_args.datatype:
-	print 'Error:  No data type (--datatype) given!\nFor Debreak usage, use -h or --help'
-	sys.exit(1)
-
-if inscor_args.datatype not in ['pacbio-raw','pacbio-hifi', 'pacbio-corr', 'nano-raw',' nano-corr']:
-	print 'Error:  Data type (--datatype) not valid. Supported read types are: pacbio-raw, pacbio-hifi, pacbio-corr, nano-raw, nano-corr.'
-	sys.exit(1)
-
-
 if inscor_args.inspector[-1]!='/':
 	readpath=inscor_args.inspector+'/'
 else:
 	readpath=inscor_args.inspector
-
 if not inscor_args.outpath:
 	outpath=readpath
 else:
@@ -46,12 +37,26 @@ else:
 if not os.path.exists(outpath):
 	os.mkdir(outpath)
 
+
+logf=open(outpath+'Inspector_correct.log','a')
+logf.write('Inspector assembly error correction starting... '+datetime.now().strftime("%d/%m/%Y %H:%M:%S")+'\n')
+
+if not inscor_args.skip_structural and not inscor_args.datatype:
+	logf.write('Error:  No data type (--datatype) given!\nFor Debreak usage, use -h or --help\n')
+	sys.exit(1)
+
+if inscor_args.datatype not in ['pacbio-raw','pacbio-hifi', 'pacbio-corr', 'nano-raw',' nano-corr']:
+	logf.write('Error:  Data type (--datatype) not valid. Supported read types are: pacbio-raw, pacbio-hifi, pacbio-corr, nano-raw, nano-corr.\n')
+	sys.exit(1)
+
+
 t1=time.time()
-print 'TIME for validating parameter',t1-t0
+logf.write('TIME for validating parameter'+str(t1-t0)+'\n')
+
 try:
 	allctg=open(readpath+'valid_contig.fa','r').read().split('>')[1:]
 except:
-	print 'Error: Contig file not valid. Please keep original file name in the inspector output directory.\nCheck if file is valid: '+readpath+'valid_contig.fa'
+	logf.write('Error: Contig file not valid. Please keep original file name in the inspector output directory.\nCheck if file is valid: '+readpath+'valid_contig.fa\n')
 	sys.exit(1)
 ctginfo={}
 for c in allctg:
@@ -59,14 +64,14 @@ for c in allctg:
 
 
 t2=time.time()
-print 'TIME for reading contig and length',t2-t1
+logf.write('TIME for reading contig and length'+str(t2-t1)+'\n')
 newsnplist=[]
 
 if not inscor_args.skip_baseerror:
 	try:
 		allsnplist=open(readpath+'small_scale_error.bed','r').read().split('\n')[1:-1]
 	except:
-		print 'Warning: small-scale eror bed file not found. Check file \'small_scale_error.bed\' in Inspector evaluation directory. Continue without small-scale error correction.'
+		logf.write('Warning: small-scale eror bed file not found. Check file \'small_scale_error.bed\' in Inspector evaluation directory. Continue without small-scale error correction.\n')
 		allsnplist=[]
 else:
 	allsnplist=[]
@@ -78,7 +83,7 @@ if not inscor_args.skip_structural:
 	try:
 		allaelist=open(readpath+'structural_error.bed','r').read().split('\n')[1:-1]
 	except:
-		print 'Warning: structural eror bed file not found. Check file \'structural_error.bed\' in Inspector evaluation directory. Continue without structural error correction.'
+		logf.write('Warning: structural eror bed file not found. Check file \'structural_error.bed\' in Inspector evaluation directory. Continue without structural error correction.\n')
 		allaelist=[]
 else:
 	allaelist=[]
@@ -98,13 +103,17 @@ allaelist=[]
 bamfile=readpath+'read_to_contig.bam'
 
 t3=time.time()
-print 'TIME for reading assembly errors',t3-t2
+logf.write('TIME for reading assembly errors'+str(t3-t2)+'\n')
+logf.close()
+
 
 for chrominfo in ctginfo:
 	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.datatype,inscor_args.thread/3)
 
 t4=time.time()
-print 'TIME for correcting all contigs',t4-t3
+logf=open(outpath+'Inspector_correct.log','a')
+logf.write('TIME for correcting all contigs'+str(t4-t3)+'\n')
+logf.close()
 
 f=open(outpath+'contig_corrected.fa','w')
 for chrominfo in ctginfo:
@@ -112,13 +121,15 @@ for chrominfo in ctginfo:
 		correctedinfo=open(outpath+'contig_corrected_'+chrominfo+'.fa','r').read()
 		f.write(correctedinfo)
 	except:
-		print 'Warning: corrected contig ',chrominfo,'not found.'
-
+		logf=open(outpath+'Inspector_correct.log','a')
+		logf.write('Warning: corrected contig ',chrominfo,'not found.\n')
+		logf.close()
 f.close()
 t5=time.time()
-print 'TIME for writing corrected contig',t5-t4
+logf=open(outpath+'Inspector_correct.log','a')
+logf.write('TIME for writing corrected contig'+str(t5-t4)+'\n')
 os.system('rm '+outpath+'contig_corrected_*fa')
-
-print 'Error correction DONE.'
+logf.write('Inspector error correction finished. Bye.\n')
+logf.close()
 
 
