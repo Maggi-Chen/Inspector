@@ -12,7 +12,9 @@ def find2(li):
         return val
 
 def getsnv(path,chrom,mincount,maxcov,mindepth):
-	print chrom
+	logf=open(path+'Inspector.log','a')
+	logf.write('Start small-scale error detection for '+chrom+'\n')
+	logf.close()
         g=open(path+'base_error_workspace/baseerror_'+chrom+'.bed','w')
         os.system('samtools mpileup -Q 0 '+path+'read_to_contig.bam -r '+chrom+' -o '+path+'base_error_workspace/base_'+chrom+'.pileup -f '+path+'valid_contig.fa')
         f=open(path+'base_error_workspace/base_'+chrom+'.pileup','r')
@@ -22,8 +24,6 @@ def getsnv(path,chrom,mincount,maxcov,mindepth):
 	if mindepth==False and type(mindepth)==bool:
 		mindepth=maxcov/10.0
 
-
-	print mindepth,maxcov
 
         while a!='':
 		if a.split('\t')[2]!='N' and mindepth<=int(a.split('\t')[3]) <=maxcov:
@@ -115,10 +115,7 @@ def getsnv(path,chrom,mincount,maxcov,mindepth):
                                                         num+=dd; inum+=1
                                                 else:
                                                         break
-                                        try:
-                                                insseq+=m[inum:][:int(num)]
-                                        except:
-                                                print info; aaa=input()
+                                        insseq+=m[inum:][:int(num)]
 
 			insacount=insseq.count('A')
                         instcount=insseq.count('T')
@@ -141,7 +138,7 @@ def getsnv(path,chrom,mincount,maxcov,mindepth):
 
                 a=f.readline()
         f.close()
-#       os.system('rm '+path+'base_error_workspace/base_'+chrom+'.pileup')
+        os.system('rm '+path+'base_error_workspace/base_'+chrom+'.pileup')
         g.close()
 	if numbaseerror==0:
 		os.system('rm '+path+'base_error_workspace/baseerror_'+chrom+'.bed')

@@ -75,9 +75,16 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 	f.write('Total length of contigs >'+str(min_size_assemblyerror)+'bp\t'+str(sum(length_ae))+'\n')
 
 	if len(length)==0:
-		print 'Warning: No contigs found. Check if input file is empty.'
+		logf=open(outpath+'Inspector.log','a')
+		logf.write('Error: No contigs found. Check if input file is empty or if --min_contig_length is too high.\n')
 		f.close()
+		logf.close()
 		quit()
+
+	if len(length_ae)==0:
+		logf=open(outpath+'Inspector.log','a')
+		logf.write('Warning: No contigs larger than '+str(min_size_assemblyerror)+'bp. No structural errors will be reported. Check if --min_contig_length_assemblyerror is too high.\n')
+		logf.close()
 
 	f.write('Longest contig\t'+str(length[0])+'\n')
 	if len(length)>1:
@@ -119,7 +126,9 @@ def mapping_info_ctg(outpath,largechrom,smallchrom,contiglength,contiglength_lar
 	mapped=sum([int(ccc) for ccc in info])
 	totalread=mapped+unmapped
 	if totalread==0:
-		print 'Warning: No read found.'
+		logf=open(outpath+'Inspector.log','a')
+		logf.write('Warning: No reads found in read_to_contig alignment.\n')
+		logf.close()
 		return 0
 	mapprate=round(10000*float(mapped)/(totalread))/100.0
 	f.write('Mapping rate /%\t'+str(mapprate)+'\n')
@@ -134,21 +143,27 @@ def mapping_info_ctg(outpath,largechrom,smallchrom,contiglength,contiglength_lar
 	cov=round(10000*float(mappedlen)/contiglength)/10000.0
 	f.write('Depth\t'+str(cov)+'\n')
 
-	info=open(outpath+'map_depth/all_readnum_large','r').read().split('\n')[:-1]
-	mapped=sum([int(ccc) for ccc in info])
-	mapprate=round(10000*float(mapped)/(totalread))/100.0
-	f.write('Mapping rate in large contigs /%\t'+str(mapprate)+'\n')
+	try:
+		info=open(outpath+'map_depth/all_readnum_large','r').read().split('\n')[:-1]
+		mapped=sum([int(ccc) for ccc in info])
+		mapprate=round(10000*float(mapped)/(totalread))/100.0
+		f.write('Mapping rate in large contigs /%\t'+str(mapprate)+'\n')
 
-	info=open(outpath+'map_depth/all_splitread_large','r').read().split('\n')[:-1]
-	splitread=sum([int(ccc) for ccc in info])
-	splrate=round(10000*float(splitread)/mapped)/100.0
-	f.write('Split-read rate in large contigs /%\t'+str(splrate)+'\n')
+		info=open(outpath+'map_depth/all_splitread_large','r').read().split('\n')[:-1]
+		splitread=sum([int(ccc) for ccc in info])
+		splrate=round(10000*float(splitread)/mapped)/100.0
+		f.write('Split-read rate in large contigs /%\t'+str(splrate)+'\n')
 
-	info=open(outpath+'map_depth/all_maplength_large','r').read().split('\n')[:-1]
-	mappedlen=sum([int(ccc) for ccc in info])
-	cov=round(10000*float(mappedlen)/contiglength_large)/10000.0
-	f.write('Depth in large conigs\t'+str(cov)+'\n\n\n')
-	f.close()
+		info=open(outpath+'map_depth/all_maplength_large','r').read().split('\n')[:-1]
+		mappedlen=sum([int(ccc) for ccc in info])
+		cov=round(10000*float(mappedlen)/contiglength_large)/10000.0
+		f.write('Depth in large conigs\t'+str(cov)+'\n\n\n')
+		f.close()
+
+	except:
+		logf=open(outpath+'Inspector.log','a')
+		logf.write('Warning: Failed to characterize read alignment in large contigs. \n')
+		logf.close()
 
 	return cov
 
@@ -337,7 +352,6 @@ def basepair_error_ref(outpath,largestchr):
 
 		totallength+=length
 		a=f.readline()
-	print totallength
 	accuracy=round((1-mismatch/float(totallength))*10000)/10000.0
 	f=open(outpath+'summary_statistics','a')
 	f.write('Base pair accuracy of longest contig from contig to reference:\n')
@@ -451,10 +465,7 @@ def get_ref_chroms(outpath):
 	while a[0]=='@':
 		if a[:3]=='@SQ':
 			chroms+=[a.split('\t')[1].split(':')[1]]
-			try:
-				length+=int(a.split('\t')[2].split(':')[1])
-			except:
-				print a; quit()
+			length+=int(a.split('\t')[2].split(':')[1])
 			if int(a.split('\t')[2].split(':')[1])>longestlen:
 				longestlen=int(a.split('\t')[2].split(':')[1])
 				longestchr=a.split('\t')[1].split(':')[1]
@@ -469,7 +480,6 @@ def check_depth_ref(outpath,ref):
 	cov1=int(subprocess.check_output("awk \'$3==1\' "+outpath+'contig_to_ref.depth | wc -l',shell=True))
 	cov2=int(subprocess.check_output("awk \'$3==2\' "+outpath+'contig_to_ref.depth | wc -l',shell=True))
 	cov3=int(subprocess.check_output("awk \'$3>2\' "+outpath+'contig_to_ref.depth | wc -l',shell=True))
-	print (cov0,cov1,cov2,cov3)
 	
 	total=cov0+cov1+cov2+cov3
 	
