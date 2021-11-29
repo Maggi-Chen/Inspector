@@ -78,7 +78,7 @@ def findpos(c,ctglength,step,startrefpos,ctgstartpos):
 
 	for m in cigar:
 		num+=m; continue
-                if m in 'M=X':
+		if m in 'M=X':
 			ctgpos+=int(num); refpos+=int(num); num=''
 		if m=='I':
 			ctgpos+=int(num);num=''
