@@ -64,46 +64,44 @@ def plot_na100(outpath):
 
 
 def findpos(c,ctglength,step,startrefpos,ctgstartpos):
-        temppos=[]
-        ctgname=c.query_name
-        refpos=c.reference_start
-        cigar=c.cigarstring
+	temppos=[]
+	ctgname=c.query_name
+	refpos=c.reference_start
+	cigar=c.cigarstring
+	if 'S' not in cigar.split('M')[0].split('=')[0] and 'H' not in cigar.split('M')[0].split('=')[0]:
+		ctgpos=0
+	else:
+		ctgpos=int(cigar.split('M')[0].split('=')[0].split('S')[0].split('H')[0])
+	currpos=ctgpos
 
-        if 'S' not in cigar.split('M')[0].split('=')[0] and 'H' not in cigar.split('M')[0].split('=')[0]:
-                ctgpos=0
-        else:
-                ctgpos=int(cigar.split('M')[0].split('=')[0].split('S')[0].split('H')[0])
-        currpos=ctgpos
+	num=''
 
-        num=''
-
-        for m in cigar:
-                if m in '1234567890':
-                        num+=m; continue
+	for m in cigar:
+		num+=m; continue
                 if m in 'M=X':
-                        ctgpos+=int(num); refpos+=int(num); num=''
-                if m=='I':
-                        ctgpos+=int(num);num=''
-                if m =='D':
-                        refpos+=int(num); num='';continue
-                if m in 'SH':
-                        if refpos>c.reference_start:
-                                break
-                        else:
-                                num=''
-                while  ctgpos>=currpos+step:
-                        if ctgpos>=currpos+step*2:
-                                temppos+=[[currpos+step,refpos+startrefpos,ctgname]]
-                        else:
-                                temppos+=[[ctgpos,refpos+startrefpos,ctgname]]
-                        currpos+=step
-        if c.flag in [16,2064]:
-                temppos=[ [ctglength-mm[0],mm[1],mm[2]] for mm in temppos]
-        updatestart=[]
-        for mm in temppos :
-                updatestart+=[[mm[0]+ctgstartpos,mm[1],mm[2]]]
+			ctgpos+=int(num); refpos+=int(num); num=''
+		if m=='I':
+			ctgpos+=int(num);num=''
+		if m =='D':
+			refpos+=int(num); num='';continue
+		if m in 'SH':
+			if refpos>c.reference_start:
+				break
+			else:
+				num=''
+		while  ctgpos>=currpos+step:
+			if ctgpos>=currpos+step*2:
+				temppos+=[[currpos+step,refpos+startrefpos,ctgname]]
+			else:
+				temppos+=[[ctgpos,refpos+startrefpos,ctgname]]
+			currpos+=step
+	if c.flag in [16,2064]:
+		temppos=[ [ctglength-mm[0],mm[1],mm[2]] for mm in temppos]
+	updatestart=[]
+	for mm in temppos :
+		updatestart+=[[mm[0]+ctgstartpos,mm[1],mm[2]]]
 
-        return updatestart
+	return updatestart
 
 
 
