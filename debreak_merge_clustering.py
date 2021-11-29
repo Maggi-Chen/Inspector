@@ -4,33 +4,33 @@ import sys
 import pysam
 
 def mergeinfolengthsort(a):
-        return int(a.split('\t')[2])
+	return int(a.split('\t')[2])
 
 def mergeinfo_insertion(candi,min_support):
-        candi.sort(key=mergeinfolengthsort)
+	candi.sort(key=mergeinfolengthsort)
 
-        if len(candi)>=1.5*min_support:
-                upper=int(candi[len(candi)*3/4].split('\t')[2])
-                lower=int(candi[len(candi)/4].split('\t')[2])
-                if upper>1.75*lower and upper-lower>50:
-                        svgroups=assign_candi_insertion(candi,upper,lower)
-                        svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
-                        svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
-                        mergedsv=[]
-                        if len(svgroups[0])>=min_support:
-                                mergedsv+=mergeinfo_insertion_oneevent(svgroups[0],min_support)
-                        if len(svgroups[1])>=min_support:
-                                mergedsv+=mergeinfo_insertion_oneevent(svgroups[1],min_support)
-                        if len(mergedsv)==2:
-                                mergedsv=[c+'\tCompoundSV' for c in mergedsv]
-                        if len(mergedsv)==1:
-                                mergedsv=[mergedsv[0]+'\tUnique']
-                        return mergedsv
-        mergedsv=mergeinfo_insertion_oneevent(candi,min_support)
-        if len(mergedsv)==1:
-                return [mergedsv[0]+'\tUnique']
-        else:
-                return []
+	if len(candi)>=1.5*min_support:
+		upper=int(candi[len(candi)*3/4].split('\t')[2])
+		lower=int(candi[len(candi)/4].split('\t')[2])
+		if upper>1.75*lower and upper-lower>50:
+			svgroups=assign_candi_insertion(candi,upper,lower)
+			svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
+			svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
+			mergedsv=[]
+			if len(svgroups[0])>=min_support:
+				mergedsv+=mergeinfo_insertion_oneevent(svgroups[0],min_support)
+			if len(svgroups[1])>=min_support:
+				mergedsv+=mergeinfo_insertion_oneevent(svgroups[1],min_support)
+			if len(mergedsv)==2:
+				mergedsv=[c+'\tCompoundSV' for c in mergedsv]
+			if len(mergedsv)==1:
+				mergedsv=[mergedsv[0]+'\tUnique']
+			return mergedsv
+	mergedsv=mergeinfo_insertion_oneevent(candi,min_support)
+	if len(mergedsv)==1:
+		return [mergedsv[0]+'\tUnique']
+	else:
+		return []
 
 def assign_candi_insertion(candi,mean1,mean2):
         group1=[]
