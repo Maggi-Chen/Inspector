@@ -42,7 +42,7 @@ Dependencies for Inspector:
 
 python 2.7  
 * pysam
-* statsmodels
+* statsmodels (tested with version 0.10.1)
 
 * minimap2  (tested with version 2.10 and 2.15)
 * samtools  (tested with version 1.9)
