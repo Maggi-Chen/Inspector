@@ -52,8 +52,7 @@ def base_correction(ctgseq,snpset,ctg):
 	print 'Base error correction for ',ctg,' finished. Time cost: ',t2-t1
 	return (newseq,snpset)
 
-def call_flye_timeout(datatype,outpath,aeinfo):
-	outtime=600
+def call_flye_timeout(datatype,outpath,aeinfo,outtime):
 	testp = multiprocessing.dummy.Pool(1)
 	testres = testp.apply_async(call_flye, args=(datatype,outpath,aeinfo))
 	try:
@@ -71,7 +70,7 @@ def call_flye(datatype,outpath,aeinfo):
 	return 0
 
 
-def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
+def findpos(aeset,snpset,bamfile,outpath,datatype,thread,outtime):
 	snpsetshift=[c for c in snpset if 'Small' in c]
 	snpsetshift.sort(key=sort_snp)
 	new=[]
@@ -117,7 +116,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
 	flyerun=multiprocessing.Pool(thread)	
 	for c in aeinfolist:
 		aeinfo=aeinfolist[c]
-		flyerun.apply_async(call_flye_timeout,args=(datatype,outpath,aeinfo))
+		flyerun.apply_async(call_flye_timeout,args=(datatype,outpath,aeinfo,outtime))
 	flyerun.close()
 	flyerun.join()
 
@@ -375,11 +374,11 @@ def ae_correction(ctgseq,aeset,outpath):
 
 
 
-def error_correction_large(ctg,oldseq,aeset,snpset,bamfile,outpath,datatype,thread):
+def error_correction_large(ctg,oldseq,aeset,snpset,bamfile,outpath,datatype,thread,flyeouttime):
 	t0=time.time()
 	(newseq,snpset)=base_correction(oldseq,snpset,ctg)
 	if aeset!=[]:
-		aeset=findpos(aeset,snpset,bamfile,outpath,datatype,thread)
+		aeset=findpos(aeset,snpset,bamfile,outpath,datatype,thread,flyeouttime)
 	if aeset!=[]:
 		(newseq,numcorr)=ae_correction(newseq,aeset,outpath)
 	ff=open(outpath+'contig_corrected_'+ctg+'.fa','w')
