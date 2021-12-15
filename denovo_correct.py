@@ -99,7 +99,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread,outtime):
 			readgroup=c.split('\t')[10].split(';')
 			aestart=int(c.split('\t')[1])
 			aeend=int(c.split('\t')[2])
-			aesize=c.split('\t')[5].split('=')[1]
+			aesize=c.split('\t')[5].split('=')[1].split(';')[0]
 			aeinfo=ctg+'__'+str(aestart)+'__'+str(aeend)+'__'+str(aesize)+'__exp' if 'Exp' in c else ctg+'__'+str(aestart)+'__'+str(aeend)+'__'+str(aesize)+'__col'
 			aeinfolist[c]=aeinfo
 
