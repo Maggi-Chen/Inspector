@@ -118,6 +118,7 @@ inspector-correct.py [-h] -i inspector_out/ --datatype pacbio-raw
   --inspector,-i        Inspector evaluation directory with original file names
   --datatype            Type of read used for Inspector evaluation. Required for structural error correction
   --outpath,-o          Output directory
+  --flyetimeout         Maximal runtime for local assembly with Flye
   --thread,-t           Number of threads
   --skip_structural     Do not correct structural errors. Local assembly will not be performed
   --skip_baseerror      Do not correct small-scale errors
