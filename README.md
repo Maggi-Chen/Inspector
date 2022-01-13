@@ -182,3 +182,6 @@ Only contigs contained in the valid_contig.fa file (longer than --min_contig_len
 
 
 
+## Citing Inspector
+If you use Inspector, please cite
+> Chen, Y., Zhang, Y., Wang, A.Y. et al. Accurate long-read de novo assembly evaluation with Inspector. Genome Biol 22, 312 (2021). https://doi.org/10.1186/s13059-021-02527-4
