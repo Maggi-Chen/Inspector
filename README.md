@@ -54,28 +54,21 @@ Dependencies for Inspector error correction module:
 
 ## Installation
 
+To create an environment with conda (recommended):
+```
+conda create --name ins python=2.7
+conda activate ins
+conda install -c bioconda inspector
+
+```
+Git install after installing all the dependencies. 
 ```
 git clone https://github.com/Maggi-Chen/Inspector.git
-```
-Then, please also add this directory to your PATH:
-```
 export PATH=$PWD/Inspector/:$PATH
 ```
 
 
-To simplify the environment setup process, Anaconda2 (https://www.anaconda.com/) is recommended.
-To create an environment with conda:
-```
-conda create --name ins python=2.7
-conda activate ins
-conda install -c bioconda minimap2=2.15
-conda install -c bioconda samtools=1.9
-conda install -c bioconda pysam=0.16.0.1
-conda install -c anaconda statsmodels=0.10.1
-conda install -c bioconda flye=2.8.3
 
-inspector.py -h
-```
 A subset of human genome assembly is available as testing dataset to validate successful installation. The contig_test.fa includes two contigs (1.4Mbp and 10Kbp). The read_test.fastq.gz includes ~60X PacBio HiFi reads belonging to these two contigs. There are 3 structural errors and 281 small-scale errors present in the testing dataset.
 ```
 cd Inspector/
