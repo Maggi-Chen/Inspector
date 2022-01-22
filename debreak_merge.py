@@ -488,45 +488,5 @@ def genotype(depth,outpath):
 	f.close()
 	return True
 
-if __name__ =="__main__":
-	#outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/flye_ccs/'
-	'''
-	allsvsignal=open(outpath+'read_to_contig.debreak.temp','r').read().split('\n')[:-1]
-	#allsvsignal=open(outpath+'read_to_large_contig.debreak.temp','r').read().split('\n')[:-1]
 
-	rawdelcalls={}; rawinscalls={};rawdupcalls={};rawinvcalls={}
-
-	chromosomes=[]
-	for c in allsvsignal:
-		if c.split('\t')[0] not in chromosomes:
-			chromosomes+=[c.split('\t')[0]]
-	for chrom in chromosomes:
-		rawdelcalls[chrom]=[c.split('\t')[0]+'\t'+c.split('\t')[1]+'\t'+c.split('\t')[2]+'\t'+c.split('\t')[6]+'\t'+c.split('\t')[4] for c in allsvsignal if 'D-' in c and c.split('\t')[0]==chrom]
-		rawinscalls[chrom]=[c.split('\t')[0]+'\t'+c.split('\t')[1]+'\t'+c.split('\t')[2]+'\t'+c.split('\t')[6]+'\t'+c.split('\t')[4] for c in allsvsignal if 'I-' in c and c.split('\t')[0]==chrom]
-		rawdupcalls[chrom]=[c.split('\t')[0]+'\t'+c.split('\t')[1]+'\t'+c.split('\t')[2]+'\t'+c.split('\t')[6]+'\t'+c.split('\t')[4] for c in allsvsignal if 'DUP-' in c and c.split('\t')[0]==chrom]
-		rawinvcalls[chrom]=[c.split('\t')[0]+'\t'+c.split('\t')[1]+'\t'+c.split('\t')[2]+'\t'+c.split('\t')[6]+'\t'+c.split('\t')[4] for c in allsvsignal if 'INV-' in c and c.split('\t')[0]==chrom]
-
-	minsupp=5
-	for chrom in chromosomes:
-		merge_insertion(minsupp,0,outpath,rawinscalls[chrom],chrom,'ins',True,)
-		merge_deletion(minsupp,0,outpath,rawdelcalls[chrom],chrom,'del',True,)
-		merge_deletion(minsupp,0,outpath,rawdupcalls[chrom],chrom,'dup',True,)
-		merge_insertion(minsupp,0,outpath,rawinvcalls[chrom],chrom,'inv',True,)
-		#quit()
-	'''
-	#ty=sys.argv[1]
-	#outpath='/data/scratch/maggic/Inspector_results/simulation_clr/'+ty+'/'
-	outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/canu_nano/'
-	#outpath='/data/scratch/maggic/Inspector_results/simulation_ccs/wtdbg_ccs/'
-	genotype(50,outpath)
-	quit()
-
-	#for tool in ['canu','flye','wtdbg','hifiasm']:
-	tool='hifiasm'
-	for ty in range(1,6):
-                        #outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/'+tool+'_'+ty+'/'
-#                outpath='/data/scratch/maggic/Inspector_results/simulation_'+ty+'/'+tool+'_'+ty+'/'
-		outpath='/data/scratch/maggic/Inspector_results/hg002_wholegenome/racon_polish'+str(ty)+'/'
-                genotype(50,outpath)
-        quit()
 

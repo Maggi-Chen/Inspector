@@ -42,7 +42,7 @@ Dependencies for Inspector:
 
 python 2.7  
 * pysam
-* statsmodels
+* statsmodels (tested with version 0.10.1)
 
 * minimap2  (tested with version 2.10 and 2.15)
 * samtools  (tested with version 1.9)
@@ -118,6 +118,7 @@ inspector-correct.py [-h] -i inspector_out/ --datatype pacbio-raw
   --inspector,-i        Inspector evaluation directory with original file names
   --datatype            Type of read used for Inspector evaluation. Required for structural error correction
   --outpath,-o          Output directory
+  --flyetimeout         Maximal runtime for local assembly with Flye
   --thread,-t           Number of threads
   --skip_structural     Do not correct structural errors. Local assembly will not be performed
   --skip_baseerror      Do not correct small-scale errors
@@ -181,3 +182,6 @@ Only contigs contained in the valid_contig.fa file (longer than --min_contig_len
 
 
 
+## Citing Inspector
+If you use Inspector, please cite
+> Chen, Y., Zhang, Y., Wang, A.Y. et al. Accurate long-read de novo assembly evaluation with Inspector. Genome Biol 22, 312 (2021). https://doi.org/10.1186/s13059-021-02527-4

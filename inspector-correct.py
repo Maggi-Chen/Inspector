@@ -14,6 +14,7 @@ parser.add_argument('-v','--version', action='version', version='Inspector_corre
 parser.add_argument('-i','--inspector',type=str,default=False,help='Inspector evaluation directory. Original file names are required.',required=True)
 parser.add_argument('--datatype',type=str,default=False,help='Type of read used for Inspector evaluation. This option is required for structural error correction when performing local assembly with Flye. (pacbio-raw, pacbio-hifi, nano-raw,pacbio-corr, nano-corr)',required=True)
 parser.add_argument('-o','--outpath',type=str,default=False,help='output directory')
+parser.add_argument('--flyetimeout',type=int,default=1200,help='Maximal runtime for local assembly with Flye. Unit is second. [1200]')
 parser.add_argument('--skip_structural',action='store_true',default=False,help='Do not correct structural errors. Local assembly will not be performed.')
 parser.add_argument('--skip_baseerror',action='store_true',default=False,help='Do not correct base errors.')
 parser.add_argument('-t','--thread',type=int,default=8,help='number of threads')
@@ -108,7 +109,7 @@ logf.close()
 
 
 for chrominfo in ctginfo:
-	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.datatype,inscor_args.thread/3)
+	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.datatype,inscor_args.thread/3,inscor_args.flyetimeout)
 
 t4=time.time()
 logf=open(outpath+'Inspector_correct.log','a')

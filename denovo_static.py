@@ -427,13 +427,13 @@ def get_ref_align_info(path,totallength):
 		
 	n50info=[c[2]-c[1] for c in maplen]
 	n50info.sort(reverse=True)
-        lenacc=0
-        na50=0
+	lenacc=0
+	na50=0
 	info=sum(n50info)
-        for c in n50info:
-                lenacc+=c
-                if lenacc>=0.5*info:
-                        na50=c;break
+	for c in n50info:
+		lenacc+=c
+		if lenacc>=0.5*info:
+			na50=c;break
 
 	assembly_maplenratio=float(info)/totallength
 	(base1,base2,base3)=count_ref_coverage(refcovered)

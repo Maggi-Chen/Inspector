@@ -10,54 +10,49 @@ def sort_snp(a):
 	return int(a.split('\t')[1])
 
 def get_snpcut_start(snp):
-        if snp.split('\t')[7] in ['BaseSubstitution', 'SmallCollapse']:
-                return int(snp.split('\t')[1])+1
-        else:
-                return int(snp.split('\t')[2])+1
+	if snp.split('\t')[7] in ['BaseSubstitution', 'SmallCollapse']:
+		return int(snp.split('\t')[1])+1
+	else:
+		return int(snp.split('\t')[2])+1
 
 def get_snpcut_end(snp):
-        if 'BaseSubstitution' == snp.split('\t')[7]:
-                return int(snp.split('\t')[1])
-        else:
-                return int(snp.split('\t')[1])+1
+	if 'BaseSubstitution' == snp.split('\t')[7]:
+		return int(snp.split('\t')[1])
+	else:
+		return int(snp.split('\t')[1])+1
 
 def base_correction(ctgseq,snpset,ctg):
-        t1=time.time()
-        snpset.sort(key=sort_snp)
-        bad=[]
-        for i in range(len(snpset)-1):
-                if 'BaseSubstitution' in snpset[i+1] and 'SmallExpansion' in snpset[i] and min(int(snpset[i+1].split('\t')[2]),int(snpset[i].split('\t')[2])+1)-max(int(snpset[i+1].split('\t')[1]),int(snpset[i].split('\t')[1])+1)>0:
-                        bad+=[snpset[i],snpset[i+1]]
-        snpset=[c for c in snpset if c not in bad]
-        cutposinfo=[]
+	t1=time.time()
+	snpset.sort(key=sort_snp)
+	bad=[]
+	for i in range(len(snpset)-1):
+		if 'BaseSubstitution' in snpset[i+1] and 'SmallExpansion' in snpset[i] and min(int(snpset[i+1].split('\t')[2]),int(snpset[i].split('\t')[2])+1)-max(int(snpset[i+1].split('\t')[1]),int(snpset[i].split('\t')[1])+1)>0:
+			bad+=[snpset[i],snpset[i+1]]
+	snpset=[c for c in snpset if c not in bad]
+	cutposinfo=[]
 	if snpset==[]:
 		return (ctgseq,snpset)
-        for i in range(len(snpset)):
-                cutinfo=[0,0,'']
-                if i>0:
-                        cutinfo[0]=get_snpcut_start(snpset[i-1])
-                cutinfo[1]=get_snpcut_end(snpset[i])
-                if 'SmallExpansion' == snpset[i].split('\t')[7]:
-                        cutinfo[2]=''
-                elif snpset[i].split('\t')[7]== 'BaseSubstitution' or snpset[i].split('\t')[7]== 'SmallCollapse':
-                        cutinfo[2]=snpset[i].split('\t')[4]
-                else:
-                        print 'Warning: Possible error in small-error correction.'
+	for i in range(len(snpset)):
+		cutinfo=[0,0,'']
+		if i>0:
+			cutinfo[0]=get_snpcut_start(snpset[i-1])
+		cutinfo[1]=get_snpcut_end(snpset[i])
+		if 'SmallExpansion' == snpset[i].split('\t')[7]:
+			cutinfo[2]=''
+		elif snpset[i].split('\t')[7]== 'BaseSubstitution' or snpset[i].split('\t')[7]== 'SmallCollapse':
+			cutinfo[2]=snpset[i].split('\t')[4]
+		else:
+			print 'Warning: Possible error in small-error correction.'
+		cutposinfo+=[cutinfo]
+	newseq=''
+	for cutinfo in cutposinfo:
+		newseq+=ctgseq[cutinfo[0]:cutinfo[1]]+cutinfo[2]
+	newseq+=ctgseq[get_snpcut_start(snpset[-1]):]
+	t2=time.time()
+	print 'Base error correction for ',ctg,' finished. Time cost: ',t2-t1
+	return (newseq,snpset)
 
-                cutposinfo+=[cutinfo]
-        #cutposinfo+=[[get_snpcut_start(snpset[-1]),-1,'']]
-        newseq=''
-        for cutinfo in cutposinfo:
-                newseq+=ctgseq[cutinfo[0]:cutinfo[1]]+cutinfo[2]
-        newseq+=ctgseq[get_snpcut_start(snpset[-1]):]
-
-        t2=time.time()
-        print 'Base error correction for ',ctg,' finished. Time cost: ',t2-t1
-        return (newseq,snpset)
-
-
-def call_flye_timeout(datatype,outpath,aeinfo):
-	outtime=600
+def call_flye_timeout(datatype,outpath,aeinfo,outtime):
 	testp = multiprocessing.dummy.Pool(1)
 	testres = testp.apply_async(call_flye, args=(datatype,outpath,aeinfo))
 	try:
@@ -75,7 +70,7 @@ def call_flye(datatype,outpath,aeinfo):
 	return 0
 
 
-def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
+def findpos(aeset,snpset,bamfile,outpath,datatype,thread,outtime):
 	snpsetshift=[c for c in snpset if 'Small' in c]
 	snpsetshift.sort(key=sort_snp)
 	new=[]
@@ -104,7 +99,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
 			readgroup=c.split('\t')[10].split(';')
 			aestart=int(c.split('\t')[1])
 			aeend=int(c.split('\t')[2])
-			aesize=c.split('\t')[5].split('=')[1]
+			aesize=c.split('\t')[5].split('=')[1].split(';')[0]
 			aeinfo=ctg+'__'+str(aestart)+'__'+str(aeend)+'__'+str(aesize)+'__exp' if 'Exp' in c else ctg+'__'+str(aestart)+'__'+str(aeend)+'__'+str(aesize)+'__col'
 			aeinfolist[c]=aeinfo
 
@@ -121,7 +116,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread):
 	flyerun=multiprocessing.Pool(thread)	
 	for c in aeinfolist:
 		aeinfo=aeinfolist[c]
-		flyerun.apply_async(call_flye_timeout,args=(datatype,outpath,aeinfo))
+		flyerun.apply_async(call_flye_timeout,args=(datatype,outpath,aeinfo,outtime))
 	flyerun.close()
 	flyerun.join()
 
@@ -166,19 +161,19 @@ def substitute_seq(ctgseq,newseq,ctgstart,ctgend,newstart,newend,diffsize):
 	leftside= check_same(newpart[:100],oldpart[10:110])
 	rightside= check_same(newpart[-100:],oldpart[-110:-10])
 	shift1=0
-        if leftside<90:
-                for shift1 in range(-5,5):
-                        leftside= check_same(newpart[:100],oldpart[10+shift1:110+shift1])
-                        if leftside>=90:
-                                break
-        shift2=0
-        if rightside <90:
-                for shift2 in range(-5,5):
-                        rightside= check_same(newpart[-100:],oldpart[-110+shift2:-10+shift2])
-                        if rightside>=90:
-                                break
-        if leftside>=90 and rightside>=90:
-                ctgseq=ctgseq[:ctgstart-1000+shift1]+newpart+ctgseq[ctgend+1000+shift2:]
+	if leftside<90:
+		for shift1 in range(-5,5):
+			leftside= check_same(newpart[:100],oldpart[10+shift1:110+shift1])
+			if leftside>=90:
+				break
+	shift2=0
+	if rightside <90:
+		for shift2 in range(-5,5):
+			rightside= check_same(newpart[-100:],oldpart[-110+shift2:-10+shift2])
+			if rightside>=90:
+				break
+	if leftside>=90 and rightside>=90:
+		ctgseq=ctgseq[:ctgstart-1000+shift1]+newpart+ctgseq[ctgend+1000+shift2:]
 		return (ctgseq,True)
 	else:
 		ctgseq=ctgseq[:ctgstart-1000]+newpart+ctgseq[ctgend+1000:]
@@ -220,7 +215,6 @@ def ae_correct_between(seq,align,start,end,size):
 		return (seq,False)
 
 
-
 def ae_correct_expcol(seq,align,aetype):
 	aeinfo=align[0].query_name
 	start=int(aeinfo.split('__')[1])
@@ -239,8 +233,6 @@ def ae_correct_expcol(seq,align,aetype):
 	(seq,ifcorr)=ae_correct_between(seq,align,start,end,size)
 	return (seq,ifcorr)
 
-
-
 def check_same(a,b):
 	a=list(a)
 	b=list(b)
@@ -254,8 +246,7 @@ def sortctg(a):
 	return int(a.split('__')[1])
 
 
-def ae_correction(ctgseq,aeset,outpath):
-	
+def ae_correction(ctgseq,aeset,outpath):	
 	ctg=aeset[0].split('\t')[0]
 		
 	f=open(outpath+'assemble_workspace/old_contig_'+ctg+'.fa','w')
@@ -383,11 +374,11 @@ def ae_correction(ctgseq,aeset,outpath):
 
 
 
-def error_correction_large(ctg,oldseq,aeset,snpset,bamfile,outpath,datatype,thread):
+def error_correction_large(ctg,oldseq,aeset,snpset,bamfile,outpath,datatype,thread,flyeouttime):
 	t0=time.time()
 	(newseq,snpset)=base_correction(oldseq,snpset,ctg)
 	if aeset!=[]:
-		aeset=findpos(aeset,snpset,bamfile,outpath,datatype,thread)
+		aeset=findpos(aeset,snpset,bamfile,outpath,datatype,thread,flyeouttime)
 	if aeset!=[]:
 		(newseq,numcorr)=ae_correction(newseq,aeset,outpath)
 	ff=open(outpath+'contig_corrected_'+ctg+'.fa','w')
