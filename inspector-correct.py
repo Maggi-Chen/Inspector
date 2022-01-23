@@ -109,7 +109,7 @@ logf.close()
 
 
 for chrominfo in ctginfo:
-	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.datatype,inscor_args.thread/3,inscor_args.flyetimeout)
+	inspector_correct.error_correction_large(chrominfo,ctginfo[chrominfo],aectg[chrominfo],snpctg[chrominfo],bamfile,outpath,inscor_args.datatype,inscor_args.thread//3,inscor_args.flyetimeout)
 
 t4=time.time()
 logf=open(outpath+'Inspector_correct.log','a')

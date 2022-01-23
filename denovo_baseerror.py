@@ -52,7 +52,7 @@ def getsnv(path,chrom,mincount,maxcov,mindepth):
 						num+=dd; inum+=1
 					else:
 						break
-				if int(num)<=int(mincount/2):
+				if int(num)<=mincount//2:
 					insseq+=[m[inum:][:int(num)]]
 				else:
 					ins-=1
@@ -71,7 +71,7 @@ def getsnv(path,chrom,mincount,maxcov,mindepth):
 						num+=dd; inum+=1
 					else:
 						break
-				if int(num)<=int(mincount/2):
+				if int(num)<=mincount//2:
 					insseq+=[m[inum:][:int(num)]]
 				else:
 					dels-=1
