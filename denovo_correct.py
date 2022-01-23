@@ -42,14 +42,14 @@ def base_correction(ctgseq,snpset,ctg):
 		elif snpset[i].split('\t')[7]== 'BaseSubstitution' or snpset[i].split('\t')[7]== 'SmallCollapse':
 			cutinfo[2]=snpset[i].split('\t')[4]
 		else:
-			print 'Warning: Possible error in small-error correction.'
+			print ('Warning: Possible error in small-error correction.')
 		cutposinfo+=[cutinfo]
 	newseq=''
 	for cutinfo in cutposinfo:
 		newseq+=ctgseq[cutinfo[0]:cutinfo[1]]+cutinfo[2]
 	newseq+=ctgseq[get_snpcut_start(snpset[-1]):]
 	t2=time.time()
-	print 'Base error correction for ',ctg,' finished. Time cost: ',t2-t1
+	print ('Base error correction for ',ctg,' finished. Time cost: ',t2-t1)
 	return (newseq,snpset)
 
 def call_flye_timeout(datatype,outpath,aeinfo,outtime):
@@ -59,14 +59,14 @@ def call_flye_timeout(datatype,outpath,aeinfo,outtime):
 		testout = testres.get(outtime)  # Wait timeout seconds for func to complete.
 		return testout
 	except multiprocessing.TimeoutError:
-		print 'Flye assembly time out for ',aeinfo
+		print ('Flye assembly time out for ',aeinfo)
 		raise
 
 def call_flye(datatype,outpath,aeinfo):
 	tt0=time.time()
 	os.system('flye --'+datatype+' '+outpath+'assemble_workspace/read_ass_'+aeinfo+'.fa -o '+outpath+'assemble_workspace/flye_out_'+aeinfo+'/ -t 4  ')
 	tt1=time.time()
-	print 'FLYETIME for ',aeinfo,tt1-tt0
+	print ('FLYETIME for ',aeinfo,tt1-tt0)
 	return 0
 
 
@@ -126,7 +126,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread,outtime):
 			allctg=open(outpath+'assemble_workspace/flye_out_'+aeinfo+'/assembly.fasta','r').read().split('>')[1:]
 		except:
 			allctg=[]	
-			print 'Inspector Assembly Fail ' ,aeinfo
+			print ('Inspector Assembly Fail ' ,aeinfo)
 			os.system('rm -rf '+outpath+'assemble_workspace/flye_out_'+aeinfo+'/')
 			continue
 		if len(allctg)==1:
@@ -135,7 +135,7 @@ def findpos(aeset,snpset,bamfile,outpath,datatype,thread,outtime):
 			f.write('>'+aeinfo+'__newctg\n'+newassseq+'\n')
 			f.close()
 		else:
-			print 'Inspector Multi/No Alignment ' ,aeinfo
+			print ('Inspector Multi/No Alignment ' ,aeinfo)
 		os.system('rm -rf '+outpath+'assemble_workspace/flye_out_'+aeinfo+'/')
 		
 		shiftpos=0
@@ -279,7 +279,7 @@ def ae_correction(ctgseq,aeset,outpath):
 	numcorr=0
 	for aligninfo in allalign:
 		if aligninfo.flag==4:
-			print aligninfo.query_name,' contig not aligned.'
+			print (aligninfo.query_name,' contig not aligned.')
 			continue
 		if aligninfo.query_name == lastreadname:
 			samectg+=[aligninfo]

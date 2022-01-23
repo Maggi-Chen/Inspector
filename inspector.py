@@ -163,7 +163,7 @@ if not denovo_args.skip_base_error:
 		debreak_det=multiprocessing.Pool(denovo_args.thread)
 		os.system('mkdir '+denovo_args.outpath+'base_error_workspace')
 		for chrom in chromosomes_map:
-			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,cov*2/5,cov*2,denovo_args.min_depth))
+			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,int(cov*2/5),cov*2,denovo_args.min_depth))
 		debreak_det.close()
 		debreak_det.join()
 
@@ -195,8 +195,8 @@ logf.close()
 
 # Reference-based evaluation
 if denovo_args.ref:
-	mapinfo=os.system("minimap2 -a -I 10G --eqx -x asm5 -t " + str(denovo_args.thread/2) + " "+denovo_args.ref+" " + denovo_args.outpath + "valid_contig.fa  --secondary=no > "+ denovo_args.outpath+"contig_to_ref.sam")
-	os.system("samtools sort -@ " + str(denovo_args.thread/2) + " "+ denovo_args.outpath+"contig_to_ref.sam -o  " + denovo_args.outpath+"contig_to_ref.bam")
+	mapinfo=os.system("minimap2 -a -I 10G --eqx -x asm5 -t " + str(int(denovo_args.thread/2)) + " "+denovo_args.ref+" " + denovo_args.outpath + "valid_contig.fa  --secondary=no > "+ denovo_args.outpath+"contig_to_ref.sam")
+	os.system("samtools sort -@ " + str(int(denovo_args.thread/2)) + " "+ denovo_args.outpath+"contig_to_ref.sam -o  " + denovo_args.outpath+"contig_to_ref.bam")
 	os.system("samtools index "+ denovo_args.outpath+"contig_to_ref.bam")
 	chromosomes=denovo_static.get_ref_align_info(denovo_args.outpath,totalcontiglen)
 	mapping_info=debreak_detect.detect_sam_ref("contig_to_ref.sam",denovo_args.outpath,denovo_args.outpath,denovo_args.min_assembly_error_size,denovo_args.max_assembly_error_size)

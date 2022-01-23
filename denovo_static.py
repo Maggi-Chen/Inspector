@@ -59,7 +59,7 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 	f.write('Statics of contigs:\n')
 
 	iii=0
-	total=sum(length)/2
+	total=int(sum(length)/2)
 	for c in length:
 		iii+=c
 		if iii>=total:
@@ -93,7 +93,7 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 
 	
 
-	iii=0; total=sum(length)/2; n50=0
+	iii=0; total=int(sum(length)/2); n50=0
 	for c in length:
 		iii+=c
 		if iii>total:
