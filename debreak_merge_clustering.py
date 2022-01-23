@@ -10,8 +10,8 @@ def mergeinfo_insertion(candi,min_support):
 	candi.sort(key=mergeinfolengthsort)
 
 	if len(candi)>=1.5*min_support:
-		upper=int(candi[len(candi)*3/4].split('\t')[2])
-		lower=int(candi[len(candi)/4].split('\t')[2])
+		upper=int(candi[len(candi)*3//4].split('\t')[2])
+		lower=int(candi[len(candi)//4].split('\t')[2])
 		if upper>1.75*lower and upper-lower>50:
 			svgroups=assign_candi_insertion(candi,upper,lower)
 			svgroups=assign_candi_insertion(candi,svgroups[2],svgroups[3])
@@ -40,8 +40,8 @@ def assign_candi_insertion(candi,mean1,mean2):
 			group1+=[c]
 		else:
 			group2+=[c]
-	mean1_new=sum([int(c.split('\t')[2]) for c in group1])/len(group1)
-	mean2_new=sum([int(c.split('\t')[2]) for c in group2])/len(group2)
+	mean1_new=sum([int(c.split('\t')[2]) for c in group1])//len(group1)
+	mean2_new=sum([int(c.split('\t')[2]) for c in group2])//len(group2)
 	return [group1,group2,mean1_new,mean2_new]
 
 
@@ -49,10 +49,10 @@ def mergeinfo_insertion_oneevent(candi,min_support):
 	candi.sort(key=mergeinfolengthsort)
 	min_support=max(2,min_support)
 	while len(candi)>max(2,min_support-2):
-		if int(candi[-1].split('\t')[2]) > 2* int(candi[len(candi)/2].split('\t')[2]) and  int(candi[-1].split('\t')[2]) -int(candi[len(candi)/2].split('\t')[2]) >30:
+		if int(candi[-1].split('\t')[2]) > 2* int(candi[len(candi)//2].split('\t')[2]) and  int(candi[-1].split('\t')[2]) -int(candi[len(candi)//2].split('\t')[2]) >30:
 			candi.remove(candi[-1])
 			continue
-		if int(candi[len(candi)/2].split('\t')[2]) >  2*int(candi[0].split('\t')[2]) and int(candi[len(candi)/2].split('\t')[2]) -int(candi[0].split('\t')[2]) >30:
+		if int(candi[len(candi)//2].split('\t')[2]) >  2*int(candi[0].split('\t')[2]) and int(candi[len(candi)//2].split('\t')[2]) -int(candi[0].split('\t')[2]) >30:
 			candi.remove(candi[0])
 			continue
 		break
@@ -61,9 +61,9 @@ def mergeinfo_insertion_oneevent(candi,min_support):
 		position=[int(c.split('\t')[1]) for c in candi]
 		length=[int(c.split('\t')[2]) for c in candi]
 		quality=[float(c.split('\t')[6]) for c in candi]
-		position=sum(position)/len(position)
+		position=sum(position)//len(position)
 		quality=sum(quality)/float(len(quality))
-		length=sum(length)/len(length)
+		length=sum(length)//len(length)
 		readnames=''
 		for c in candi:
 			readnames+=c.split('\t')[4]+';'
@@ -332,7 +332,7 @@ def filterae(depth,outpath,min_size,datatype):
 		rat=0.7
 
 	highcov=depth*2
-	lowcov=depth/2
+	lowcov=depth//2
 	exp=[c for c in allsv if 'Exp' in c]
 	col=[c for c in allsv if 'Col' in c]
 	inv=[c for c in allsv if 'Inv' in c]
@@ -348,7 +348,7 @@ def filterae(depth,outpath,min_size,datatype):
 				colread=d.split('\t')[6].split(';'); goodcol=len(list(dict.fromkeys((colread))))
 				totaln=len(list(dict.fromkeys((expread+colread))))
 				if 0.33<=int(c[3])/float(d.split('\t')[3])<=3:
-					if totaln<min(goodexp+goodcol/2,goodcol+goodexp/2):
+					if totaln<min(goodexp+goodcol//2,goodcol+goodexp//2):
 						expsize=int(c[5].split('=')[1])
 						colsize=int(d.split('\t')[5].split('=')[1])
 						if expsize>colsize+min_size:
