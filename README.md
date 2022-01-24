@@ -10,7 +10,7 @@ Draft date: Apr. 20, 2021
 
 ## Quick Start
 ```sh
-git clone https://github.com/Maggi-Chen/Inspector.git
+git clone https://github.com/ChongLab/Inspector.git
 cd Inspector/
 ./inspector.py -h
 
@@ -40,7 +40,7 @@ Inspector is a tool for assembly evaluation with long read data. The input inclu
 
 Dependencies for Inspector:
 
-python 2.7  
+* python  
 * pysam
 * statsmodels (tested with version 0.10.1)
 
@@ -56,14 +56,14 @@ Dependencies for Inspector error correction module:
 
 To create an environment with conda (recommended):
 ```
-conda create --name ins python=2.7
+conda create --name ins
 conda activate ins
 conda install -c bioconda inspector
 
 ```
 Git install after installing all the dependencies. 
 ```
-git clone https://github.com/Maggi-Chen/Inspector.git
+git clone https://github.com/ChongLab/Inspector.git
 export PATH=$PWD/Inspector/:$PATH
 ```
 
