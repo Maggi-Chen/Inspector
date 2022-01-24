@@ -163,7 +163,7 @@ if not denovo_args.skip_base_error:
 		debreak_det=multiprocessing.Pool(denovo_args.thread)
 		os.system('mkdir '+denovo_args.outpath+'base_error_workspace')
 		for chrom in chromosomes_map:
-			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,int(cov*2/5),cov*2,denovo_args.min_depth))
+			debreak_det.apply_async(denovo_baseerror.getsnv,args=(denovo_args.outpath,chrom,cov*2/5,cov*2,denovo_args.min_depth))
 		debreak_det.close()
 		debreak_det.join()
 

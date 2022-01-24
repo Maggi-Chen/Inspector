@@ -332,7 +332,7 @@ def filterae(depth,outpath,min_size,datatype):
 		rat=0.7
 
 	highcov=depth*2
-	lowcov=depth//2
+	lowcov=depth/2
 	exp=[c for c in allsv if 'Exp' in c]
 	col=[c for c in allsv if 'Col' in c]
 	inv=[c for c in allsv if 'Inv' in c]
