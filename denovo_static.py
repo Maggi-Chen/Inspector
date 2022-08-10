@@ -448,8 +448,8 @@ def get_ref_align_info(path,totallength):
 	f.write('Reference base with Depth=1 '+str(base1)+';\t'+str(base1/float(totalrefbase)*100)+'%\n')
 	f.write('Reference base with Depth=2 '+str(base2)+';\t'+str(base2/float(totalrefbase)*100)+'%\n')
 	f.write('Reference base with Depth>2 '+str(base3)+';\t'+str(base3/float(totalrefbase)*100)+'%\n')
-	f.write('Assembly contig mapping ratio (length) /%'+str(assembly_maplenratio)+'\n')
-	f.write('Assembly contig NA50 '+str(na50)+'\n')
+	f.write('Assembly contig mapping ratio (length) /%\t'+str(assembly_maplenratio)+'\n')
+	f.write('Assembly contig NA50\t'+str(na50)+'\n')
 	f.close()
 
 	return allrefchrom
@@ -484,11 +484,11 @@ def check_depth_ref(outpath,ref):
 	total=cov0+cov1+cov2+cov3
 	
 	f=open(outpath+'summary_statistics','a')
-	f.write('#BP with cov=0   '+str(cov0)+',  '+str(cov0*100.00/total)+'\n')
-	f.write('#BP with cov=1   '+str(cov1)+',  '+str(cov1*100.00/total)+'\n')
-	f.write('#BP with cov=2   '+str(cov2)+',  '+str(cov2*100.00/total)+'\n')
-	f.write('#BP with cov>2   '+str(cov3)+',  '+str(cov3*100.00/total)+'\n')
-	f.write('Coverage:  '+str(1-round(10000*float(cov0)/total)/10000.0)+'\n')
+	f.write('#BP with cov=0\t'+str(cov0*100.00/total)+'\n')
+	f.write('#BP with cov=1\t'+str(cov1*100.00/total)+'\n')
+	f.write('#BP with cov=2\t'+str(cov2*100.00/total)+'\n')
+	f.write('#BP with cov>2\t'+str(cov3*100.00/total)+'\n')
+	f.write('Coverage\t'+str(1-round(10000*float(cov0)/total)/10000.0)+'\n')
 	f.close()
 	
 	return 0
