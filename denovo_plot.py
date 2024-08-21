@@ -27,7 +27,7 @@ def plot_n100(outpath,minlen):
 	plt.xlabel('N1-N100')
 	plt.ylabel('Contig Length /bp')
 	plt.savefig(outpath+'plot_n1n100.pdf')
-	print 'end n100'
+	print ('end n100')
 	return 0
 
 
@@ -58,7 +58,7 @@ def plot_na100(outpath):
 	plt.xlabel('NA1-NA100')
 	plt.ylabel('Contig Length /bp')
 	plt.savefig(outpath+'plot_na1na100.pdf')
-	print 'end na100'
+	print ('end na100')
 	return 0
 
 
@@ -106,14 +106,14 @@ def findpos(c,ctglength,step,startrefpos,ctgstartpos):
 
 
 def plot_dotplot(outpath):
-	print 'start dot plot'
+	print ('start dot plot')
 	samfile=pysam.AlignmentFile(outpath+'contig_to_ref.bam','rb')
 	allchrom=samfile.references
 	allchromlen=samfile.lengths
 	maxreflen=max(allchromlen)
 	idex=allchromlen.index(maxreflen)
 	maxchrom=allchrom[idex]
-	print maxchrom
+	print (maxchrom)
 	allread=samfile.fetch(maxchrom)
 	if maxreflen >= 10000000:
 		step=10000
@@ -134,7 +134,7 @@ def plot_dotplot(outpath):
 			alignedctg[align.query_name]+=align.query_alignment_length
 	longalignctg=[c for c in alignedctg if alignedctg[c] >= maxreflen/100.0]
 
-	print len(longalignctg)
+	print (len(longalignctg))
 
 	startpos=0
 	contig_startpos={}
