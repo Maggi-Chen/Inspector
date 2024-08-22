@@ -439,7 +439,7 @@ def detect_sortbam_nosv(writepath,chrom,contig_type):
 		number_read+=1
 		if align.has_tag("SA"):
 			if align.mapping_quality > 50:
-			split_num+=1
+				split_num+=1
 
 	if totalmaplength!=0:
 		f=open(writepath+'map_depth/maplength_'+contig_type+'_'+chrom,'w')
