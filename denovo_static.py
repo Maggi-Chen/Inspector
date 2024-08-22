@@ -25,7 +25,7 @@ def simple(contigfile,outpath,min_size,min_size_assemblyerror):
 			contig=gzip.open(contig,'rt')
 		else:
 			contig=open(contig,'r')
-		allcontig=open(contig,'r').read().split('>')[1:]
+		allcontig=contig.read().split('>')[1:]
 		for c in allcontig:
 			c=c.split('\n')[:-1]
 			contig_name=c[0].split(' ')[0]
