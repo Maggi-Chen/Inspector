@@ -396,12 +396,13 @@ def detect_sortbam(workpath,min_size,max_size,chrom):
 				tempfile.write(d[0]+'\t'+str(d[1])+'\t'+str(d[2])+'\t'+d[3]+'\t'+readname+'\t'+str(flag)+'\t'+str(mappingquality)+'\n')
 
 			if align.has_tag("SA") :
-				split_num+=1
-				if chrom in [c.split(',')[0] for c in align.get_tag("SA").split(';')[:-1]]:
-					if readname not in segmentreads:
-						segmentreads[readname]=[readinfo]
-					else:
-						segmentreads[readname]+=[readinfo]
+				if align.mapping_quality > 55:
+					split_num+=1
+					if chrom in [c.split(',')[0] for c in align.get_tag("SA").split(';')[:-1]]:
+						if readname not in segmentreads:
+							segmentreads[readname]=[readinfo]
+						else:
+							segmentreads[readname]+=[readinfo]
 
 	for readgroup in segmentreads:
 		if len(segmentreads[readgroup])<2 or len(segmentreads[readgroup])>20:
@@ -437,7 +438,8 @@ def detect_sortbam_nosv(writepath,chrom,contig_type):
 		totalmaplength+=align.query_length
 		number_read+=1
 		if align.has_tag("SA"):
-			split_num+=1
+			if align.mapping_quality > 55:
+				split_num+=1
 
 	if totalmaplength!=0:
 		f=open(writepath+'map_depth/maplength_'+contig_type+'_'+chrom,'w')
