@@ -46,7 +46,7 @@ if not inscor_args.skip_structural and not inscor_args.datatype:
 	logf.write('Error:  No data type (--datatype) given!\nFor Debreak usage, use -h or --help\n')
 	sys.exit(1)
 
-if inscor_args.datatype not in ['pacbio-raw','pacbio-hifi', 'pacbio-corr', 'nano-raw',' nano-corr']:
+if inscor_args.datatype not in ['pacbio-raw','pacbio-hifi', 'pacbio-corr', 'nano-raw','nano-corr']:
 	logf.write('Error:  Data type (--datatype) not valid. Supported read types are: pacbio-raw, pacbio-hifi, pacbio-corr, nano-raw, nano-corr.\n')
 	sys.exit(1)
 
