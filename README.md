@@ -6,7 +6,7 @@ Author: Maggi Chen
 
 Email: maggic@uab.edu
 
-Draft date: Apr. 20, 2021
+Current update: Aug. 25, 2024
 
 ## Quick Start
 ```sh
